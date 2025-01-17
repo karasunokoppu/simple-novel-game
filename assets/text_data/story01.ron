@@ -1,0 +1,27 @@
+[
+    (
+        current_id: 1,
+        scene_type: (
+            type: "Text",
+            name: "name01",
+            text: "text01",
+            next_id: 2,
+        ),
+    ),
+    (
+        current_id: 2,
+        scene_type: (
+            type: "Selector",
+            choice01: (
+                type: "Choice",
+                text: "choice 01 -> 03",
+                next_id: 3,
+            ),
+            choice02: (
+                type: "Selector",
+                text: "choice 02 -> 04",
+                next_id: 4,
+            )
+        )
+    )
+]
