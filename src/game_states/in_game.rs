@@ -47,13 +47,15 @@ enum InGameState {
 #[derive(Resource)]
 pub struct NovelGameStates {
     story: String,
-    story_index: i32,
+    current_story_id: i32,
+    next_story_id: i32,
 }
 impl Default for NovelGameStates {
     fn default() -> NovelGameStates {
         NovelGameStates {
             story: "story01".to_string(),
-            story_index: 0,
+            current_story_id: 1,
+            next_story_id: 2,
         }
     }
 }
@@ -81,7 +83,7 @@ enum SceneType {
 struct Text {
     name: String,
     text: String,
-    next_id: u32,
+    next_id: u32,//Todo ←これいる？
 }
 
 #[derive(Deserialize, Debug)]
