@@ -18,11 +18,3 @@ pub fn draw_scene_plugin(app: &mut App) {
 // Tag component used to tag entities added on the new_game_loading scene
 #[derive(Component)]
 struct OnDraw;
-
-#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-enum DrawUIState {
-    Text,
-    Select,
-    #[default]
-    Disabled,
-}

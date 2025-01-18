@@ -18,9 +18,6 @@ pub fn new_game_loading_plugin(app: &mut App){
     .add_systems(OnEnter(InGameState::NewGameLoading), (
         load_story_new_game,
     ))
-    .add_systems(OnEnter(InGameState::NewGameLoading), (
-        state_to_control
-    ).after(load_story_new_game))
     .add_systems(OnExit(InGameState::NewGameLoading), despawn_screen::<OnNewGameLoading>);
 }
 
@@ -28,11 +25,12 @@ pub fn new_game_loading_plugin(app: &mut App){
 #[derive(Component)]
 struct OnNewGameLoading;
 
-pub fn load_story_new_game(
+fn load_story_new_game(
     mut data_list: ResMut<StoryDataList>,
-    novel_game_states: Res<NovelGameStates>
-) {
-    //[story data].ronを開く
+    novel_game_states: Res<NovelGameStates>,
+    mut in_game_state: ResMut<NextState<InGameState>>,
+){
+    //[story data].ronを開く//
     let path = format!("assets/text_data/{}.ron", novel_game_states.story);
     let file = File::open(path).expect("fail opening file");
 
@@ -46,13 +44,10 @@ pub fn load_story_new_game(
     };
     println!("{}: {:?}", novel_game_states.story, story_scene_datas);
 
-    //Todo (ストーリ名、データリスト)のハッシュマップに入れる必要ある？
+    //Todo (ストーリ名、データリスト)のハッシュマップに入れる必要ある？//
     data_list.story_data_list
         .insert(novel_game_states.story.to_string(), story_scene_datas);
-}
 
-fn state_to_control(
-    mut in_game_state: ResMut<NextState<InGameState>>,
-) {
+    //state to control
     in_game_state.set(InGameState::Control);
 }

@@ -1,9 +1,9 @@
 use bevy::{prelude::*, state::commands};
 
-use crate::despawn_screen;
-
-use super::DrawUIState;
-
+use crate::{
+    despawn_screen,
+    game_states::in_game::DrawUIState
+};
 
 pub fn select_ui_plugin(app: &mut App) {
     app

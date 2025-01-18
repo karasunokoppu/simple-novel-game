@@ -10,10 +10,10 @@ use serde::Deserialize;
 use crate::{despawn_screen, GameState, game_states::in_game};
 
 pub fn game_plugin(app: &mut App) {
-    app//.add_systems(OnEnter(GameState::Game), game_setup)
-        //.add_systems(Update, game.run_if(in_state(GameState::Game)))
+    app
         .init_state::<InGameState>()
-        .init_resource::<in_game::StoryDataList>()
+        .init_state::<DrawUIState>()
+        .init_resource::<StoryDataList>()
         .add_plugins((
             in_game::control::conrol_scene_plugin,
             in_game::draw::draw_scene_plugin,
@@ -55,9 +55,18 @@ impl Default for NovelGameStates {
         NovelGameStates {
             story: "story01".to_string(),
             current_story_id: 1,
-            next_story_id: 2,
+            next_story_id: 1,
         }
     }
+}
+
+//ゲームUIのstate管理
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum DrawUIState {
+    Text,
+    Select,
+    #[default]
+    Disabled,
 }
 
 //ストーリーのテキストをロードして保管するための構造体
@@ -74,7 +83,7 @@ pub struct StorySceneData {
 
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type")]
-enum SceneType {
+pub enum SceneType {
     Text(Text),
     Selector(Selector),
 }

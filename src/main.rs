@@ -28,7 +28,15 @@ struct Volume(u32);
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+    .add_plugins(
+        DefaultPlugins.set(WindowPlugin{
+            primary_window: Some(Window {//windowの設定
+                title:"bevy novel game".to_string(),
+                ..default()
+            }),
+            ..default()
+        })
+    )
         // Insert as resource the initial value for the settings resources
         .insert_resource(DisplayQuality::Medium)
         .insert_resource(Volume(7))
