@@ -14,6 +14,10 @@ pub fn game_plugin(app: &mut App) {
         .init_state::<InGameState>()
         .init_state::<DrawUIState>()
         .init_resource::<StoryDataList>()
+        .init_resource::<StoryImageList>()
+        .init_resource::<StoryWallPaperList>()
+        .init_resource::<ImageAssets>()
+        .init_resource::<WallpaperAssets>()
         .add_plugins((
             in_game::control::conrol_scene_plugin,
             in_game::draw::draw_scene_plugin,
@@ -27,6 +31,18 @@ pub fn game_plugin(app: &mut App) {
             despawn_screen::<OnGameScreen>,
             state_to_disabled,
         ));
+}
+
+fn state_to_new_game_loading(
+    mut in_game_state: ResMut<NextState<InGameState>>,
+) {
+    in_game_state.set(InGameState::NewGameLoading);
+}
+
+fn state_to_disabled(
+    mut in_game_state: ResMut<NextState<InGameState>>,
+) {
+    in_game_state.set(InGameState::Disabled);
 }
 
 // Tag component used to tag entities added on the game screen
@@ -59,6 +75,35 @@ impl Default for NovelGameStates {
         }
     }
 }
+#[derive(Resource)]
+struct ImageAssets{
+    images: HashMap<u32, Handle<Image>>
+}
+impl Default for ImageAssets {
+    fn default() -> Self {
+        let mut images = HashMap::new();
+        images.insert(1, Handle::default());
+
+        ImageAssets {
+            images: images
+        }
+    }
+}
+
+#[derive(Resource)]
+struct WallpaperAssets{
+    images: HashMap<u32, Handle<Image>>
+}
+impl Default for WallpaperAssets {
+    fn default() -> Self {
+        let mut images = HashMap::new();
+        images.insert(1, Handle::default());
+
+        WallpaperAssets {
+            images: images
+        }
+    }
+}
 
 //ゲームUIのstate管理
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -70,7 +115,7 @@ pub enum DrawUIState {
 }
 
 //ストーリーのテキストをロードして保管するための構造体
-#[derive(Resource, Default)]
+#[derive(Resource, Default, Debug)]
 pub struct StoryDataList {
     story_data_list: HashMap<String, Vec<StorySceneData>>,
 }
@@ -86,6 +131,7 @@ pub struct StorySceneData {
 pub enum SceneType {
     Text(Text),
     Selector(Selector),
+    Finish(Finish),
 }
 
 #[derive(Deserialize, Debug)]
@@ -108,14 +154,53 @@ struct Choice {
     next_id: u32,
 }
 
-fn state_to_new_game_loading(
-    mut in_game_state: ResMut<NextState<InGameState>>,
-) {
-    in_game_state.set(InGameState::NewGameLoading);
+#[derive(Deserialize, Debug)]
+struct Finish {
+    text: String
 }
 
-fn state_to_disabled(
-    mut in_game_state: ResMut<NextState<InGameState>>,
-) {
-    in_game_state.set(InGameState::Disabled);
+//ストーリーの画像をロードして保管するための構造体
+#[derive(Resource, Default)]
+pub struct StoryImageList {
+    story_data_list: HashMap<String, (Vec<ImageData>, Vec<DisplayImage>)>,
+}
+
+#[derive(Component, Deserialize, Debug)]
+pub struct ImageData {
+    image_id: u32,
+    chara: String,
+    face: String,
+    scale: (f32, f32)
+}
+
+#[derive(Component, Deserialize, Debug)]
+pub struct DisplayImage {
+    story_scene_id: u32,
+    //center
+    center_image_scene_id: u32,
+    center_top_length: f32,
+    //right
+    right_image_scene_id: u32,
+    right_top_length: f32,
+    //left
+    left_image_scene_id: u32,
+    left_top_length: f32,
+}
+
+//背景画像をロードして保管するための構造体
+#[derive(Resource, Default)]
+pub struct StoryWallPaperList{
+    pub story_data_list: HashMap<String, (Vec<WallPaperData>, Vec<Wallpapers>)>,
+}
+
+#[derive(Component, Deserialize, Debug)]
+pub struct WallPaperData {
+    story_id: u32,
+    image_id: u32,
+}
+
+#[derive(Component, Deserialize, Debug)]
+pub struct Wallpapers{
+    image_id: u32,
+    wallpaper_name: String
 }

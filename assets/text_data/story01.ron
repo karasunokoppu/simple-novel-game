@@ -23,5 +23,21 @@
                 next_id: 4,
             )
         )
-    )
+    ),
+    (
+        current_id: 3,
+        scene_type: (
+            type: "Text",
+            name: "name01",
+            text: "choice01",
+            next_id: 1,
+        ),
+    ),
+    (
+        current_id: 4,
+        scene_type: (
+            type: "Finish",
+            text: "Finish Story01"
+        ),
+    ),
 ]

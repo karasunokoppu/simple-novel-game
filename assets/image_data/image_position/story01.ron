@@ -1,0 +1,75 @@
+[
+    (
+        story_scene_id: 1,
+    	//center
+    	center_image_scene_id: 1,
+    	center_top_length: 0.0,
+    	//right
+    	right_image_scene_id: 2,
+    	right_top_length: 0.0,
+    	//left
+    	left_image_scene_id: 3,
+    	left_top_length: 0.0,
+    ),
+    (
+        story_scene_id: 2,
+    	//center
+    	center_image_scene_id: 4,
+    	center_top_length: 0.0,
+    	//right
+    	right_image_scene_id: 5,
+    	right_top_length: 0.0,
+    	//left
+    	left_image_scene_id: 6,
+    	left_top_length: 0.0,
+    ),
+    (
+        story_scene_id: 3,
+    	//center
+    	center_image_scene_id: 1,
+    	center_top_length: 0.0,
+    	//right
+    	right_image_scene_id: 2,
+    	right_top_length: 0.0,
+    	//left
+    	left_image_scene_id: 3,
+    	left_top_length: 0.0,
+    ),
+    (
+        story_scene_id: 4,
+    	//center
+    	center_image_scene_id: 4,
+    	center_top_length: 0.0,
+    	//right
+    	right_image_scene_id: 5,
+    	right_top_length: 0.0,
+    	//left
+    	left_image_scene_id: 6,
+    	left_top_length: 0.0,
+    ),
+    (
+        story_scene_id: 5,
+    	//center
+    	center_image_scene_id: 1,
+    	center_top_length: 0.0,
+    	//right
+    	right_image_scene_id: 2,
+    	right_top_length: 0.0,
+    	//left
+    	left_image_scene_id: 3,
+    	left_top_length: 0.0,
+    ),
+    (
+        story_scene_id: 6,
+    	//center
+    	center_image_scene_id: 4,
+    	center_top_length: 0.0,
+    	//right
+    	right_image_scene_id: 5,
+    	right_top_length: 0.0,
+    	//left
+    	left_image_scene_id: 6,
+    	left_top_length: 0.0,
+    ),
+    
+]

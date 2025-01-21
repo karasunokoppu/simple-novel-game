@@ -1,0 +1,14 @@
+[
+    (
+	image_id: 1,
+	wallpaper_name: "school_corridor_day"
+    ),
+    (
+	image_id: 2,
+	wallpaper_name: "school_corridor_evening"
+    ),
+    (
+	image_id: 3,
+	wallpaper_name: "school_corridor_night"
+    ),
+]
