@@ -22,7 +22,7 @@ fn change_drawui_state(
     mut in_game_state: ResMut<NextState<InGameState>>,
     mut game_state: ResMut<NextState<GameState>>,
 ) {
-    for (story, datas) in data_list.story_data_list.iter() {
+    for (_, datas) in data_list.story_data_list.iter() {
         for story_scene_data in datas.iter() {
             if story_scene_data.current_id == novel_game_states.next_story_id as u32 {
                 println!("================================");
@@ -31,19 +31,23 @@ fn change_drawui_state(
                 println!("================================");
 
                 match &story_scene_data.scene_type {
-                    SceneType::Text(text) => {
+                    SceneType::Text(_) => {
                         in_game_state.set(InGameState::Draw);
                         next_draw_ui_state.set(DrawUIState::Text);
                         //現在のIDを更新
                         novel_game_states.current_story_id = novel_game_states.next_story_id;
+                        println!("> InGameState Control -> Draw");
+                        println!("> DrawUIState Disabled -> Text");
                     }
-                    SceneType::Selector(selector) => {
+                    SceneType::Selector(_) => {
                         in_game_state.set(InGameState::Draw);
                         next_draw_ui_state.set(DrawUIState::Select);
                         //現在のIDを更新
                         novel_game_states.current_story_id = novel_game_states.next_story_id;
+                        println!("> InGameState Control -> Draw");
+                        println!("> DrawUIState Disabled -> Select");
                     }
-                    SceneType::Finish(finish) => {
+                    SceneType::Finish(_) => {
                         next_draw_ui_state.set(DrawUIState::Disabled);
                         in_game_state.set(InGameState::Disabled);
                         game_state.set(GameState::MainMenu);
@@ -52,6 +56,9 @@ fn change_drawui_state(
                         novel_game_states.next_story_id = 1;
                         //現在のIDを更新
                         novel_game_states.current_story_id = novel_game_states.next_story_id;
+                        println!("> InGameState [] -> Disabled");
+                        println!("> DrawUIState Disabled -> Disabled");
+                        println!("> GameState NewGame -> MainMenu");
                     }
                 }
             }

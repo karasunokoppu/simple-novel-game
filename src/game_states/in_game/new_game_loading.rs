@@ -1,39 +1,45 @@
 use bevy::prelude::*;
 use std::fs::File;
-use ron::*;
 
 use crate::{
     despawn_screen,
     game_states::in_game::{
-        ImageData, DisplayImage, InGameState, NovelGameStates, StoryDataList, StoryImageList, StorySceneData, WallPaperData, WallpaperAssets, Wallpapers
-    }
+        DisplayImage, ImageData, InGameState, NovelGameStates, StoryDataList, StoryImageList,
+        StorySceneData, WallPaperData, WallpaperAssets, Wallpapers,
+    },
 };
 
 use super::{ImageAssets, StoryWallPaperList};
 
-pub fn new_game_loading_plugin(app: &mut App){
-    app
-    .init_resource::<NovelGameStates>()
-    //.add_systems(OnEnter(InGameState::NewGameLoading), deser_story_new_game)
-    .add_systems(OnEnter(InGameState::NewGameLoading), (
-        deser_story_new_game,
-        deser_image_new_game,
-        deser_wallpaper_image,
-        load_chara_image,
-        load_wallpaper_image,
-        in_game_state_to_control,
-    ).chain())
-    .add_systems(OnExit(InGameState::NewGameLoading), despawn_screen::<OnNewGameLoading>);
+pub fn new_game_loading_plugin(app: &mut App) {
+    app.init_resource::<NovelGameStates>()
+        //.add_systems(OnEnter(InGameState::NewGameLoading), deser_story_new_game)
+        .add_systems(
+            OnEnter(InGameState::NewGameLoading),
+            (
+                deser_text_new_game,
+                deser_image_new_game,
+                deser_wallpaper_image,
+                load_chara_image,
+                load_wallpaper_image,
+                in_game_state_to_control,
+            )
+                .chain(),
+        )
+        .add_systems(
+            OnExit(InGameState::NewGameLoading),
+            despawn_screen::<OnNewGameLoading>,
+        );
 }
 
 // Tag component used to tag entities added on the new_game_loading scene
 #[derive(Component)]
 struct OnNewGameLoading;
 
-fn deser_story_new_game(
+fn deser_text_new_game(
     mut data_list: ResMut<StoryDataList>,
     novel_game_states: Res<NovelGameStates>,
-){
+) {
     //[story data].ronを開く//
     let path = format!("assets/text_data/{}.ron", novel_game_states.story);
     let file = File::open(path).expect("fail opening file");
@@ -46,11 +52,13 @@ fn deser_story_new_game(
             std::process::exit(1);
         }
     };
-    println!("{}: {:?}", novel_game_states.story, story_scene_datas);
-
+    //println!("{}: {:?}", novel_game_states.story, story_scene_datas);
     //Todo (ストーリ名、データリスト)のハッシュマップに入れる必要ある？//
-    data_list.story_data_list
+    data_list
+        .story_data_list
         .insert(novel_game_states.story.to_string(), story_scene_datas);
+
+    println!("> [deser_text_new_game] is finished.");
 }
 
 fn deser_image_new_game(
@@ -58,10 +66,17 @@ fn deser_image_new_game(
     novel_game_states: Res<NovelGameStates>,
 ) {
     //[image data].ronを開く//
-    let image_data_path = format!("assets/image_data/asset_image/{}.ron", novel_game_states.story);
+    let image_data_path = format!(
+        "assets/image_data/asset_image/{}.ron",
+        novel_game_states.story
+    );
     let image_data_file = File::open(image_data_path).expect("fail opening image_data_file");
-    let display_image_path = format!("assets/image_data/image_position/{}.ron", novel_game_states.story);
-    let display_image_file = File::open(display_image_path).expect("fail opening display_image_file");
+    let display_image_path = format!(
+        "assets/image_data/image_position/{}.ron",
+        novel_game_states.story
+    );
+    let display_image_file =
+        File::open(display_image_path).expect("fail opening display_image_file");
 
     //image_dataのdeserialize
     let vec_image_data: Vec<ImageData> = match ron::de::from_reader(image_data_file) {
@@ -71,7 +86,7 @@ fn deser_image_new_game(
             std::process::exit(1);
         }
     };
-    println!("{}: {:?}", novel_game_states.story, vec_image_data);
+    //println!("{}: {:?}", novel_game_states.story, vec_image_data);
 
     //display_imageのdeserialize
     let vec_display_image: Vec<DisplayImage> = match ron::de::from_reader(display_image_file) {
@@ -81,33 +96,48 @@ fn deser_image_new_game(
             std::process::exit(1);
         }
     };
-    println!("{}: {:?}", novel_game_states.story, vec_display_image);
+    //println!("{}: {:?}", novel_game_states.story, vec_display_image);
 
-    image_list.story_data_list.insert(novel_game_states.story.to_string(), (vec_image_data, vec_display_image));
+    image_list.story_data_list.insert(
+        novel_game_states.story.to_string(),
+        (vec_image_data, vec_display_image),
+    );
+
+    println!("> [deser_image_new_game] is finished.");
 }
 
 fn load_chara_image(
     mut image_assets: ResMut<ImageAssets>,
     image_list: Res<StoryImageList>,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
 ) {
-    for (_, (image_datas, _)) in image_list.story_data_list.iter(){
-        for image_data in image_datas.iter(){
-            let handle = asset_server.load(format!("image/charactor/{}/{}.png", image_data.chara, image_data.face));
+    for (_, (image_datas, _)) in image_list.story_data_list.iter() {
+        for image_data in image_datas.iter() {
+            let handle = asset_server.load(format!(
+                "image/charactor/{}/{}.png",
+                image_data.chara, image_data.face
+            ));
             image_assets.images.insert(image_data.image_id, handle);
         }
     }
-    println!("{:?}", image_assets.images);
+    //println!("{:?}", image_assets.images);
+    println!("> [load_chara_image] is finished.");
 }
 
 fn deser_wallpaper_image(
     mut data_list: ResMut<StoryWallPaperList>,
     novel_game_states: Res<NovelGameStates>,
-){
+) {
     //[wallpaper data].ronを開く//
-    let image_data_path = format!("assets/wallpaper_data/wallpaper_states/{}.ron", novel_game_states.story);
+    let image_data_path = format!(
+        "assets/wallpaper_data/wallpaper_states/{}.ron",
+        novel_game_states.story
+    );
     let image_data_file = File::open(image_data_path).expect("fail opening file");
-    let wallpaper_path = format!("assets/wallpaper_data/wallpaper_assets/{}.ron", novel_game_states.story);
+    let wallpaper_path = format!(
+        "assets/wallpaper_data/wallpaper_assets/{}.ron",
+        novel_game_states.story
+    );
     let wallpaper_file = File::open(wallpaper_path).expect("fail opening file");
 
     //背景画像の遷移データのdeserialize
@@ -118,7 +148,7 @@ fn deser_wallpaper_image(
             std::process::exit(1);
         }
     };
-    println!("{}: {:?}", novel_game_states.story, vec_wallpaper_data);
+    //println!("{}: {:?}", novel_game_states.story, vec_wallpaper_data);
 
     //背景画像関連データのdeserialize
     let vec_image_data: Vec<Wallpapers> = match ron::de::from_reader(wallpaper_file) {
@@ -128,29 +158,34 @@ fn deser_wallpaper_image(
             std::process::exit(1);
         }
     };
-    println!("{}: {:?}", novel_game_states.story, vec_wallpaper_data);
+    //println!("{}: {:?}", novel_game_states.story, vec_wallpaper_data);
 
     //Todo (ストーリ名、データリスト)のハッシュマップに入れる必要ある？//
-    data_list.story_data_list.insert(novel_game_states.story.to_string(), (vec_wallpaper_data, vec_image_data));
+    data_list.story_data_list.insert(
+        novel_game_states.story.to_string(),
+        (vec_wallpaper_data, vec_image_data),
+    );
+    println!("> [deser_wallpaper_image] is finished.");
 }
 
 fn load_wallpaper_image(
     mut wallpaper_assets: ResMut<WallpaperAssets>,
     image_list: Res<StoryWallPaperList>,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
 ) {
-    for (_, (_, wallpapers)) in image_list.story_data_list.iter(){
+    for (_, (_, wallpapers)) in image_list.story_data_list.iter() {
         for wallpaper in wallpapers.iter() {
-            let handle = asset_server.load(format!("image/background/{}.png", wallpaper.wallpaper_name));
+            let handle =
+                asset_server.load(format!("image/background/{}.png", wallpaper.wallpaper_name));
             wallpaper_assets.images.insert(wallpaper.image_id, handle);
         }
     }
-    println!("{:?}", wallpaper_assets.images);
+    //println!("{:?}", wallpaper_assets.images);
+    println!("> [load_wallpaper_image] is finished.");
 }
 
-fn in_game_state_to_control(
-    mut in_game_state: ResMut<NextState<InGameState>>,
-) {
+fn in_game_state_to_control(mut in_game_state: ResMut<NextState<InGameState>>) {
     //Todo state to control
     in_game_state.set(InGameState::Control);
+    println!("> InGameState NewGameLoading -> Control");
 }

@@ -4,14 +4,13 @@ pub mod new_game_loading;
 pub mod pause;
 
 use bevy::prelude::*;
-use std::collections::HashMap;
 use serde::Deserialize;
+use std::collections::HashMap;
 
-use crate::{despawn_screen, GameState, game_states::in_game};
+use crate::{despawn_screen, game_states::in_game, GameState};
 
 pub fn game_plugin(app: &mut App) {
-    app
-        .init_state::<InGameState>()
+    app.init_state::<InGameState>()
         .init_state::<DrawUIState>()
         .init_resource::<StoryDataList>()
         .init_resource::<StoryImageList>()
@@ -24,24 +23,18 @@ pub fn game_plugin(app: &mut App) {
             in_game::pause::pause_scene_plugin,
             in_game::new_game_loading::new_game_loading_plugin,
         ))
-        .add_systems(OnEnter(GameState::NewGame), (
-            state_to_new_game_loading,
-        ))
-        .add_systems(OnExit(GameState::NewGame), (
-            despawn_screen::<OnGameScreen>,
-            state_to_disabled,
-        ));
+        .add_systems(OnEnter(GameState::NewGame), (state_to_new_game_loading,))
+        .add_systems(
+            OnExit(GameState::NewGame),
+            (despawn_screen::<OnGameScreen>, state_to_disabled),
+        );
 }
 
-fn state_to_new_game_loading(
-    mut in_game_state: ResMut<NextState<InGameState>>,
-) {
+fn state_to_new_game_loading(mut in_game_state: ResMut<NextState<InGameState>>) {
     in_game_state.set(InGameState::NewGameLoading);
 }
 
-fn state_to_disabled(
-    mut in_game_state: ResMut<NextState<InGameState>>,
-) {
+fn state_to_disabled(mut in_game_state: ResMut<NextState<InGameState>>) {
     in_game_state.set(InGameState::Disabled);
 }
 
@@ -76,32 +69,28 @@ impl Default for NovelGameStates {
     }
 }
 #[derive(Resource)]
-struct ImageAssets{
-    images: HashMap<u32, Handle<Image>>
+pub struct ImageAssets {
+    images: HashMap<u32, Handle<Image>>,
 }
 impl Default for ImageAssets {
     fn default() -> Self {
         let mut images = HashMap::new();
         images.insert(1, Handle::default());
 
-        ImageAssets {
-            images: images
-        }
+        ImageAssets { images: images }
     }
 }
 
 #[derive(Resource)]
-struct WallpaperAssets{
-    images: HashMap<u32, Handle<Image>>
+pub struct WallpaperAssets {
+    images: HashMap<u32, Handle<Image>>,
 }
 impl Default for WallpaperAssets {
     fn default() -> Self {
         let mut images = HashMap::new();
         images.insert(1, Handle::default());
 
-        WallpaperAssets {
-            images: images
-        }
+        WallpaperAssets { images: images }
     }
 }
 
@@ -135,14 +124,14 @@ pub enum SceneType {
 }
 
 #[derive(Deserialize, Debug)]
-struct Text {
+pub struct Text {
     name: String,
     text: String,
-    next_id: u32,//Todo ←これいる？
+    next_id: u32, //Todo ←これいる？
 }
 
 #[derive(Deserialize, Debug)]
-struct Selector {
+pub struct Selector {
     choice01: Choice,
     choice02: Choice,
 }
@@ -155,8 +144,8 @@ struct Choice {
 }
 
 #[derive(Deserialize, Debug)]
-struct Finish {
-    text: String
+pub struct Finish {
+    text: String,
 }
 
 //ストーリーの画像をロードして保管するための構造体
@@ -170,7 +159,7 @@ pub struct ImageData {
     image_id: u32,
     chara: String,
     face: String,
-    scale: (f32, f32)
+    scale: (f32, f32),
 }
 
 #[derive(Component, Deserialize, Debug)]
@@ -189,7 +178,7 @@ pub struct DisplayImage {
 
 //背景画像をロードして保管するための構造体
 #[derive(Resource, Default)]
-pub struct StoryWallPaperList{
+pub struct StoryWallPaperList {
     pub story_data_list: HashMap<String, (Vec<WallPaperData>, Vec<Wallpapers>)>,
 }
 
@@ -200,7 +189,7 @@ pub struct WallPaperData {
 }
 
 #[derive(Component, Deserialize, Debug)]
-pub struct Wallpapers{
+pub struct Wallpapers {
     image_id: u32,
-    wallpaper_name: String
+    wallpaper_name: String,
 }

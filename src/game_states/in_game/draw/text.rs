@@ -2,14 +2,19 @@ use bevy::prelude::*;
 
 use crate::{
     despawn_screen,
-    game_states::in_game::{DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList},
+    game_states::in_game::{
+        draw::draw_img, DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList,
+    },
     TEXT_COLOR,
 };
 
 pub fn text_ui_plugin(app: &mut App) {
-    app.add_systems(OnEnter(DrawUIState::Text), setup_text_ui)
-        .add_systems(Update, button_system.run_if(in_state(DrawUIState::Text)))
-        .add_systems(OnExit(DrawUIState::Text), despawn_screen::<OnTextUI>);
+    app.add_systems(
+        OnEnter(DrawUIState::Text),
+        setup_text_ui.after(draw_img::setup_draw_image),
+    )
+    .add_systems(Update, button_system.run_if(in_state(DrawUIState::Text)))
+    .add_systems(OnExit(DrawUIState::Text), despawn_screen::<OnTextUI>);
 }
 
 #[derive(Component)]
@@ -21,7 +26,7 @@ const PRESSED_BUTTON: Color = Color::srgb(0.5, 0.5, 0.5);
 const UI_BORDER_COLOR: Color = Color::srgb(0.8, 0.8, 0.8);
 const UI_BACKGROUND_COLOR: Color = Color::Srgba(Srgba::new(0.2, 0.2, 0.2, 0.8));
 
-fn setup_text_ui(
+pub fn setup_text_ui(
     mut commands: Commands,
     data_list: Res<StoryDataList>,
     novel_game_states: Res<NovelGameStates>,
@@ -30,7 +35,7 @@ fn setup_text_ui(
     let mut name_text = String::new();
     let mut main_text = String::new();
 
-    for (story, datas) in data_list.story_data_list.iter() {
+    for (_, datas) in data_list.story_data_list.iter() {
         for story_scene_data in datas.iter() {
             if story_scene_data.current_id == novel_game_states.current_story_id as u32 {
                 name_text = match &story_scene_data.scene_type {
@@ -54,7 +59,7 @@ fn setup_text_ui(
                 justify_content: JustifyContent::Center,
                 ..default()
             },
-            Transform::from_xyz(0.0, 0.0, 1.0),
+            Transform::from_xyz(0.0, 0.0, 10.0),
             OnTextUI,
         ))
         .with_children(|parent| {
@@ -148,7 +153,7 @@ fn button_system(
                 *background_color = PRESSED_BUTTON.into();
 
                 //next_idを変更
-                for (story, datas) in data_list.story_data_list.iter() {
+                for (_, datas) in data_list.story_data_list.iter() {
                     for story_scene_data in datas.iter() {
                         if story_scene_data.current_id == novel_game_states.current_story_id as u32
                         {
@@ -159,7 +164,6 @@ fn button_system(
                                 }
                                 _ => {
                                     panic!("Wrong SceneType!");
-                                    1
                                 }
                             }
                         }
@@ -171,6 +175,8 @@ fn button_system(
                 //state変更
                 in_game_state.set(InGameState::Control);
                 draw_ui_state.set(DrawUIState::Disabled);
+                println!("> InGameState Draw -> Control");
+                println!("> DrawUIState Text -> Disabled");
             }
             Interaction::Hovered => *background_color = HOVERED_BUTTON.into(),
             Interaction::None => *background_color = UI_BACKGROUND_COLOR.into(),

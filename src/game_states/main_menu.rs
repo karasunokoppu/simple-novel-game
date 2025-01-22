@@ -388,10 +388,7 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
                         ))
                         .with_children(|parent| {
                             // Display a label for the current setting
-                            parent.spawn((
-                                Text::new("Display Quality"),
-                                button_text_style.clone(),
-                            ));
+                            parent.spawn((Text::new("Display Quality"), button_text_style.clone()));
                             // Display a button for each possible value
                             for quality_setting in [
                                 DisplayQuality::Low,

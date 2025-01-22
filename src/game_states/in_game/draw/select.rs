@@ -2,25 +2,23 @@ use bevy::prelude::*;
 
 use crate::{
     despawn_screen,
-    TEXT_COLOR,
     game_states::in_game::{
-        InGameState,
-        DrawUIState,
-        NovelGameStates,
-        StoryDataList,
-        SceneType,
-    }
+        draw::draw_img, DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList,
+    },
+    TEXT_COLOR,
 };
 
 #[derive(Component)]
-enum SelectChoice{
+enum SelectChoice {
     Choice01,
     Choice02,
 }
 
 pub fn select_ui_plugin(app: &mut App) {
-    app
-    .add_systems(OnEnter(DrawUIState::Select), setup_select_ui)
+    app.add_systems(
+        OnEnter(DrawUIState::Select),
+        setup_select_ui.after(draw_img::setup_draw_image),
+    )
     .add_systems(Update, button_system.run_if(in_state(DrawUIState::Select)))
     .add_systems(OnExit(DrawUIState::Select), despawn_screen::<OnSelectUI>);
 }
@@ -43,20 +41,16 @@ fn setup_select_ui(
     let mut choice01_text = String::new();
     let mut choice02_text = String::new();
 
-    for (story, datas) in data_list.story_data_list.iter() {
+    for (_, datas) in data_list.story_data_list.iter() {
         for story_scene_data in datas.iter() {
-            if story_scene_data.current_id == novel_game_states.current_story_id as u32{
+            if story_scene_data.current_id == novel_game_states.current_story_id as u32 {
                 choice01_text = match &story_scene_data.scene_type {
-                    SceneType::Selector(selector) => {
-                        selector.choice01.text.clone()
-                    }
-                    _ => {"Error".to_string()}
+                    SceneType::Selector(selector) => selector.choice01.text.clone(),
+                    _ => "Error".to_string(),
                 };
                 choice02_text = match &story_scene_data.scene_type {
-                    SceneType::Selector(selector) => {
-                        selector.choice02.text.clone()
-                    }
-                    _ => {"Error".to_string()}
+                    SceneType::Selector(selector) => selector.choice02.text.clone(),
+                    _ => "Error".to_string(),
                 };
             }
         }
@@ -72,66 +66,73 @@ fn setup_select_ui(
         ..default()
     };
 
-    commands.spawn((//画面全体
-        Node{
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            flex_direction: FlexDirection::Column,
-            ..default()
-        },
-        OnSelectUI
-    )).with_children(|parent|{
-        parent.spawn(
+    commands
+        .spawn((
+            //画面全体
             Node {
-                flex_direction: FlexDirection::Column,
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
                 align_items: AlignItems::Center,
-                ..default()
-            }
-        ).with_children(|parent|{
-            parent.spawn((
-                Button,
-                SelectChoice::Choice01,
-                button_node.clone(),
-                BorderColor(UI_BORDER_COLOR),
-                BackgroundColor(UI_BACKGROUND_COLOR),
-            )).with_children(|parent|{
-                parent.spawn((
-                    Text::new(choice01_text),
-                    TextFont {
-                        font_size: 30.0,
-                        ..default()
-                    },
-                    TextColor(TEXT_COLOR),
-                ));
-            });
-        });
-        parent.spawn(
-            Node {
+                justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
                 ..default()
-            }
-        ).with_children(|parent|{
-            parent.spawn((
-                Button,
-                SelectChoice::Choice02,
-                button_node.clone(),
-                BorderColor(UI_BORDER_COLOR),
-                BackgroundColor(UI_BACKGROUND_COLOR),
-            )).with_children(|parent|{
-                parent.spawn((
-                    Text::new(choice02_text),
-                    TextFont {
-                        font_size: 30.0,
-                        ..default()
-                    },
-                    TextColor(TEXT_COLOR),
-                ));
-            });
+            },
+            OnSelectUI,
+        ))
+        .with_children(|parent| {
+            parent
+                .spawn(Node {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent
+                        .spawn((
+                            Button,
+                            SelectChoice::Choice01,
+                            button_node.clone(),
+                            BorderColor(UI_BORDER_COLOR),
+                            BackgroundColor(UI_BACKGROUND_COLOR),
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((
+                                Text::new(choice01_text),
+                                TextFont {
+                                    font_size: 30.0,
+                                    ..default()
+                                },
+                                TextColor(TEXT_COLOR),
+                            ));
+                        });
+                });
+            parent
+                .spawn(Node {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent
+                        .spawn((
+                            Button,
+                            SelectChoice::Choice02,
+                            button_node.clone(),
+                            BorderColor(UI_BORDER_COLOR),
+                            BackgroundColor(UI_BACKGROUND_COLOR),
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((
+                                Text::new(choice02_text),
+                                TextFont {
+                                    font_size: 30.0,
+                                    ..default()
+                                },
+                                TextColor(TEXT_COLOR),
+                            ));
+                        });
+                });
         });
-    });
 }
 
 fn button_system(
@@ -147,28 +148,26 @@ fn button_system(
     for (interaction, mut background_color, select_choice) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                *background_color =PRESSED_BUTTON.into();
+                *background_color = PRESSED_BUTTON.into();
 
                 //next_idを変更
-                for (story, datas) in data_list.story_data_list.iter() {
-                    for story_scene_data in datas.iter(){
-                        if story_scene_data.current_id == novel_game_states.current_story_id as u32 {
+                for (_, datas) in data_list.story_data_list.iter() {
+                    for story_scene_data in datas.iter() {
+                        if story_scene_data.current_id == novel_game_states.current_story_id as u32
+                        {
                             novel_game_states.next_story_id = match &story_scene_data.scene_type {
-                                SceneType::Selector(selector) => {
-                                    match select_choice {
-                                        SelectChoice::Choice01 => {
-                                            println!("next_id is {}", selector.choice01.next_id);
-                                            selector.choice01.next_id as i32
-                                        }
-                                        SelectChoice::Choice02 => {
-                                            println!("next_id is {}", selector.choice02.next_id);
-                                            selector.choice02.next_id as i32
-                                        }
+                                SceneType::Selector(selector) => match select_choice {
+                                    SelectChoice::Choice01 => {
+                                        println!("next_id is {}", selector.choice01.next_id);
+                                        selector.choice01.next_id as i32
                                     }
-                                }
+                                    SelectChoice::Choice02 => {
+                                        println!("next_id is {}", selector.choice02.next_id);
+                                        selector.choice02.next_id as i32
+                                    }
+                                },
                                 _ => {
                                     panic!("Wrong SceneType!");
-                                    1
                                 }
                             }
                         }
@@ -180,9 +179,11 @@ fn button_system(
                 //state変更
                 draw_ui_state.set(DrawUIState::Disabled);
                 in_game_state.set(InGameState::Control);
-            },
-            Interaction::Hovered => *background_color =HOVERED_BUTTON.into(),
-            Interaction::None => {},
+                println!("> InGameState Draw -> Control");
+                println!("> DrawUIState Select -> Disabled");
+            }
+            Interaction::Hovered => *background_color = HOVERED_BUTTON.into(),
+            Interaction::None => {}
         }
     }
 }

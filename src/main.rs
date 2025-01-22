@@ -11,7 +11,7 @@ enum GameState {
     Splash,
     MainMenu,
     NewGame,
-    RestartGame
+    RestartGame,
 }
 
 // One of the two settings that can be set through the menu. It will be a resource in the app
@@ -28,15 +28,14 @@ struct Volume(u32);
 
 fn main() {
     App::new()
-    .add_plugins(
-        DefaultPlugins.set(WindowPlugin{
-            primary_window: Some(Window {//windowの設定
-                title:"bevy novel game".to_string(),
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                //windowの設定
+                title: "bevy novel game".to_string(),
                 ..default()
             }),
             ..default()
-        })
-    )
+        }))
         // Insert as resource the initial value for the settings resources
         .insert_resource(DisplayQuality::Medium)
         .insert_resource(Volume(7))
