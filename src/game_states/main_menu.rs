@@ -2,6 +2,8 @@ use bevy::{app::AppExit, color::palettes::css::CRIMSON, prelude::*};
 
 use crate::{despawn_screen, DisplayQuality, GameState, Volume, TEXT_COLOR};
 
+//TODO [複数のファイルに分割する]
+//TODO [デザイン変更]
 // This plugin manages the menu, with 5 different screens:
 // - a main menu with "New Game", "Settings", "Quit"
 // - a settings menu with two submenus and a back button

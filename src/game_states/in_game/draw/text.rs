@@ -20,6 +20,7 @@ pub fn text_ui_plugin(app: &mut App) {
 #[derive(Component)]
 struct OnTextUI;
 
+//TODO [色のテーマを一元管理するようにする]
 //Color
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
 const PRESSED_BUTTON: Color = Color::srgb(0.5, 0.5, 0.5);

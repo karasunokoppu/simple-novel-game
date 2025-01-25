@@ -47,7 +47,7 @@ fn change_drawui_state(
                         println!("> InGameState Control -> Draw");
                         println!("> DrawUIState Disabled -> Select");
                     }
-                    SceneType::Finish(_) => {
+                    SceneType::Finish(_) => {//TODO [Finishの持つ、textの値によって処理を変更する]
                         next_draw_ui_state.set(DrawUIState::Disabled);
                         in_game_state.set(InGameState::Disabled);
                         game_state.set(GameState::MainMenu);
