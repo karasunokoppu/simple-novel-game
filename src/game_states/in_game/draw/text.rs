@@ -57,6 +57,7 @@ pub fn setup_text_ui(
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
+                display: Display::Flex,
                 justify_content: JustifyContent::Center,
                 ..default()
             },
@@ -70,9 +71,9 @@ pub fn setup_text_ui(
                     Node {
                         width: Val::Vw(80.0),
                         height: Val::Px(250.0),
-                        align_self: AlignSelf::End,
-                        justify_content: JustifyContent::FlexEnd,
+                        display: Display::Flex,
                         flex_direction: FlexDirection::Column,
+                        align_self: AlignSelf::End,
                         ..default()
                     },
                 )
@@ -83,7 +84,8 @@ pub fn setup_text_ui(
                             Node {
                                 width: Val::Px(250.0),
                                 height: Val::Px(50.0),
-                                align_items: AlignItems::FlexStart,
+                                display: Display::Flex,
+                                justify_content: JustifyContent::Center,
                                 border: UiRect::new(
                                     Val::Px(3.0),
                                     Val::Px(3.0),
@@ -111,6 +113,7 @@ pub fn setup_text_ui(
                             Node {
                                 width: Val::Percent(100.0),
                                 height: Val::Px(200.0),
+                                padding: UiRect::all(Val::Px(10.0)),
                                 justify_items: JustifyItems::End,
                                 border: UiRect::new(
                                     Val::Px(3.0),
