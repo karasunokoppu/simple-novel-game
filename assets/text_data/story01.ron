@@ -37,7 +37,7 @@
         current_id: 4,
         scene_type: (
             type: "Finish",
-            text: "Finish Story01"
+            text: "story02"
         ),
     ),
 ]

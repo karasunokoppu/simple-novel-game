@@ -11,35 +11,20 @@ use crate::{
 
 use super::{ImageAssets, StoryWallPaperList};
 
-pub fn new_game_loading_plugin(app: &mut App) {
+pub fn continue_game_loading_plugin(app: &mut App) {
     app
-        .add_systems(
-            OnEnter(InGameState::NewGameLoading),
-            (
-                deser_text_new_game,
-                deser_image_new_game,
-                deser_wallpaper_image,
-                load_chara_image,
-                load_wallpaper_image,
-                in_game_state_to_control,
-            )
-                .chain(),
-        )
         .add_systems(
             OnEnter(InGameState::ContinueGameLoading),
             (
-                deser_text_new_game,
-                deser_image_new_game,
+                reset_datas,
+                // change_story.after(reset_datas),
+                (deser_text_start_game,
+                deser_image_start_game,
                 deser_wallpaper_image,
                 load_chara_image,
-                load_wallpaper_image,
-                in_game_state_to_control,
-            )
-                .chain(),
-        )
-        .add_systems(
-            OnExit(InGameState::NewGameLoading),
-            despawn_screen::<OnNewGameLoading>,
+                load_wallpaper_image,).after(reset_datas),
+                in_game_state_to_control.after(load_wallpaper_image),
+            ).chain(),
         )
         .add_systems(
             OnExit(InGameState::ContinueGameLoading),
@@ -47,11 +32,21 @@ pub fn new_game_loading_plugin(app: &mut App) {
         );
 }
 
-// Tag component used to tag entities added on the new_game_loading scene
+// Tag component used to tag entities added on the start_game_loading scene
 #[derive(Component)]
 struct OnNewGameLoading;
 
-fn deser_text_new_game(
+fn reset_datas(
+    mut commands: Commands,
+) {
+    commands.insert_resource(StoryDataList::default());
+    commands.insert_resource(StoryImageList::default());
+    commands.insert_resource(ImageAssets::default());
+    commands.insert_resource(StoryWallPaperList::default());
+    commands.insert_resource(WallpaperAssets::default());
+}
+
+fn deser_text_start_game(
     mut data_list: ResMut<StoryDataList>,
     novel_game_states: Res<NovelGameStates>,
 ) {
@@ -69,14 +64,15 @@ fn deser_text_new_game(
     };
     //println!("{}: {:?}", novel_game_states.story, story_scene_datas);
     //Todo (ストーリ名、データリスト)のハッシュマップに入れる必要ある？//
+    data_list.story_data_list.clear();
     data_list
         .story_data_list
         .insert(novel_game_states.story.to_string(), story_scene_datas);
 
-    println!("> [deser_text_new_game] is finished.");
+    println!("> [deser_text_start_game] is finished.");
 }
 
-fn deser_image_new_game(
+fn deser_image_start_game(
     mut image_list: ResMut<StoryImageList>,
     novel_game_states: Res<NovelGameStates>,
 ) {
@@ -113,12 +109,13 @@ fn deser_image_new_game(
     };
     //println!("{}: {:?}", novel_game_states.story, vec_display_image);
 
+    image_list.story_data_list.clear();
     image_list.story_data_list.insert(
         novel_game_states.story.to_string(),
         (vec_image_data, vec_display_image),
     );
 
-    println!("> [deser_image_new_game] is finished.");
+    println!("> [deser_image_start_game] is finished.");
 }
 
 fn load_chara_image(
@@ -132,6 +129,7 @@ fn load_chara_image(
                 "image/charactor/{}/{}.png",
                 image_data.chara, image_data.face
             ));
+            //image_assets.images.clear();
             image_assets.images.insert(image_data.image_id, handle);
         }
     }
@@ -176,6 +174,7 @@ fn deser_wallpaper_image(
     //println!("{}: {:?}", novel_game_states.story, vec_wallpaper_data);
 
     //Todo (ストーリ名、データリスト)のハッシュマップに入れる必要ある？//
+    data_list.story_data_list.clear();
     data_list.story_data_list.insert(
         novel_game_states.story.to_string(),
         (vec_wallpaper_data, vec_image_data),
@@ -192,6 +191,7 @@ fn load_wallpaper_image(
         for wallpaper in wallpapers.iter() {
             let handle =
                 asset_server.load(format!("image/background/{}.png", wallpaper.wallpaper_name));
+            wallpaper_assets.images.clear();
             wallpaper_assets.images.insert(wallpaper.image_id, handle);
         }
     }

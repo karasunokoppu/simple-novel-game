@@ -260,6 +260,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 //ボタン押下による画面遷移
+//TODO [continue Game時にストーリーシーンを選べるようにする]
 fn menu_action(
     interaction_query: Query<
         (&Interaction, &MenuButtonAction),
@@ -280,7 +281,7 @@ fn menu_action(
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::RestartPlay => {
-                    game_state.set(GameState::RestartGame);
+                    game_state.set(GameState::ContinueGame);
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::Settings => menu_state.set(MenuState::Settings),

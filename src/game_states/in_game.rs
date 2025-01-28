@@ -1,6 +1,7 @@
 pub mod control;
 pub mod draw;
 pub mod new_game_loading;
+pub mod continue_game_loading;
 pub mod pause;
 
 use bevy::prelude::*;
@@ -17,21 +18,32 @@ pub fn game_plugin(app: &mut App) {
         .init_resource::<StoryWallPaperList>()
         .init_resource::<ImageAssets>()
         .init_resource::<WallpaperAssets>()
+        .init_resource::<NovelGameStates>()
         .add_plugins((
             in_game::control::conrol_scene_plugin,
             in_game::draw::draw_scene_plugin,
             in_game::pause::pause_scene_plugin,
             in_game::new_game_loading::new_game_loading_plugin,
+            in_game::continue_game_loading::continue_game_loading_plugin,
         ))
-        .add_systems(OnEnter(GameState::NewGame), (state_to_new_game_loading,))
+        .add_systems(OnEnter(GameState::NewGame), state_to_new_game_loading)
         .add_systems(
             OnExit(GameState::NewGame),
+            (despawn_screen::<OnGameScreen>, state_to_disabled),
+        )
+        .add_systems(OnEnter(GameState::ContinueGame), state_to_continue_loading)
+        .add_systems(
+            OnExit(GameState::ContinueGame),
             (despawn_screen::<OnGameScreen>, state_to_disabled),
         );
 }
 
 fn state_to_new_game_loading(mut in_game_state: ResMut<NextState<InGameState>>) {
     in_game_state.set(InGameState::NewGameLoading);
+}
+
+fn state_to_continue_loading(mut in_game_state: ResMut<NextState<InGameState>>) {
+    in_game_state.set(InGameState::ContinueGameLoading);
 }
 
 fn state_to_disabled(mut in_game_state: ResMut<NextState<InGameState>>) {
@@ -45,6 +57,7 @@ struct OnGameScreen;
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 enum InGameState {
     NewGameLoading,
+    ContinueGameLoading,
     Pause,
     Control,
     Draw,
