@@ -284,7 +284,9 @@ fn menu_action(
                     game_state.set(GameState::ContinueGame);
                     menu_state.set(MenuState::Disabled);
                 }
-                MenuButtonAction::Settings => menu_state.set(MenuState::Settings),
+                MenuButtonAction::Settings => {
+                    menu_state.set(MenuState::Settings)
+                },
                 MenuButtonAction::SettingsDisplay => {
                     menu_state.set(MenuState::SettingsDisplay);
                 }

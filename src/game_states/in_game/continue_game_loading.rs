@@ -6,39 +6,59 @@ use crate::{
     game_states::in_game::{
         DisplayImage, ImageData, InGameState, NovelGameStates, StoryDataList, StoryImageList,
         StorySceneData, WallPaperData, WallpaperAssets, Wallpapers,
-    },
+    }, GameState,
 };
 
 use super::{ImageAssets, StoryWallPaperList};
 
 pub fn continue_game_loading_plugin(app: &mut App) {
     app
-        .add_systems(
-            OnEnter(InGameState::ContinueGameLoading),
-            (
-                reset_datas,
-                // change_story.after(reset_datas),
-                (deser_text_start_game,
-                deser_image_start_game,
-                deser_wallpaper_image,
-                load_chara_image,
-                load_wallpaper_image,).after(reset_datas),
-                in_game_state_to_control.after(load_wallpaper_image),
-            ).chain(),
+    // .add_systems(
+    //     OnEnter(InGameState::ContinueGameLoading),
+    //     (
+    //         reset_datas,
+    //         (
+    //             deser_text_start_game,
+    //             deser_image_start_game,
+    //             deser_wallpaper_image,
+    //             load_chara_image,
+    //             load_wallpaper_image,
+    //         )
+    //             .after(reset_datas),
+    //         in_game_state_to_control.after(load_wallpaper_image),
+    //     )
+    //         .chain(),
+    // )
+    .add_systems(
+        OnEnter(GameState::ContinueGame),
+        (
+            game_state_to_ingame,
+            reset_datas,
+            deser_text_new_game,
+            deser_image_new_game,
+            deser_wallpaper_image,
+            load_chara_image,
+            load_wallpaper_image,
+            in_game_state_to_control,
         )
-        .add_systems(
-            OnExit(InGameState::ContinueGameLoading),
-            despawn_screen::<OnNewGameLoading>,
-        );
+            .chain(),
+    )
+    .add_systems(
+        OnExit(InGameState::ContinueGameLoading),
+        despawn_screen::<OnContinueGameLoading>,
+    );
 }
 
 // Tag component used to tag entities added on the start_game_loading scene
 #[derive(Component)]
-struct OnNewGameLoading;
-
-fn reset_datas(
-    mut commands: Commands,
+struct OnContinueGameLoading;
+fn game_state_to_ingame(
+    mut game_state: ResMut<NextState<GameState>>
 ) {
+    game_state.set(GameState::InGame);
+}
+
+fn reset_datas(mut commands: Commands) {
     commands.insert_resource(StoryDataList::default());
     commands.insert_resource(StoryImageList::default());
     commands.insert_resource(ImageAssets::default());
@@ -46,7 +66,8 @@ fn reset_datas(
     commands.insert_resource(WallpaperAssets::default());
 }
 
-fn deser_text_start_game(
+//TODO [new_game_loading.rsとcontinue_game_loading.rsの共通部分を切り出して統合する]
+fn deser_text_new_game(
     mut data_list: ResMut<StoryDataList>,
     novel_game_states: Res<NovelGameStates>,
 ) {
@@ -62,9 +83,7 @@ fn deser_text_start_game(
             std::process::exit(1);
         }
     };
-    //println!("{}: {:?}", novel_game_states.story, story_scene_datas);
-    //Todo (ストーリ名、データリスト)のハッシュマップに入れる必要ある？//
-    data_list.story_data_list.clear();
+    //TODO [(ストーリ名、データリスト)のハッシュマップに入れる必要ある？]
     data_list
         .story_data_list
         .insert(novel_game_states.story.to_string(), story_scene_datas);
@@ -72,7 +91,7 @@ fn deser_text_start_game(
     println!("> [deser_text_start_game] is finished.");
 }
 
-fn deser_image_start_game(
+fn deser_image_new_game(
     mut image_list: ResMut<StoryImageList>,
     novel_game_states: Res<NovelGameStates>,
 ) {
@@ -97,7 +116,6 @@ fn deser_image_start_game(
             std::process::exit(1);
         }
     };
-    //println!("{}: {:?}", novel_game_states.story, vec_image_data);
 
     //display_imageのdeserialize
     let vec_display_image: Vec<DisplayImage> = match ron::de::from_reader(display_image_file) {
@@ -107,9 +125,7 @@ fn deser_image_start_game(
             std::process::exit(1);
         }
     };
-    //println!("{}: {:?}", novel_game_states.story, vec_display_image);
 
-    image_list.story_data_list.clear();
     image_list.story_data_list.insert(
         novel_game_states.story.to_string(),
         (vec_image_data, vec_display_image),
@@ -129,11 +145,9 @@ fn load_chara_image(
                 "image/charactor/{}/{}.png",
                 image_data.chara, image_data.face
             ));
-            //image_assets.images.clear();
             image_assets.images.insert(image_data.image_id, handle);
         }
     }
-    //println!("{:?}", image_assets.images);
     println!("> [load_chara_image] is finished.");
 }
 
@@ -141,7 +155,7 @@ fn deser_wallpaper_image(
     mut data_list: ResMut<StoryWallPaperList>,
     novel_game_states: Res<NovelGameStates>,
 ) {
-    //[wallpaper data].ronを開く//
+    //[wallpaper data].ronを開く
     let image_data_path = format!(
         "assets/wallpaper_data/wallpaper_states/{}.ron",
         novel_game_states.story
@@ -161,7 +175,6 @@ fn deser_wallpaper_image(
             std::process::exit(1);
         }
     };
-    //println!("{}: {:?}", novel_game_states.story, vec_wallpaper_data);
 
     //背景画像関連データのdeserialize
     let vec_image_data: Vec<Wallpapers> = match ron::de::from_reader(wallpaper_file) {
@@ -171,10 +184,8 @@ fn deser_wallpaper_image(
             std::process::exit(1);
         }
     };
-    //println!("{}: {:?}", novel_game_states.story, vec_wallpaper_data);
 
-    //Todo (ストーリ名、データリスト)のハッシュマップに入れる必要ある？//
-    data_list.story_data_list.clear();
+    //TODO [(ストーリ名、データリスト)のハッシュマップに入れる必要ある？]
     data_list.story_data_list.insert(
         novel_game_states.story.to_string(),
         (vec_wallpaper_data, vec_image_data),
@@ -191,16 +202,13 @@ fn load_wallpaper_image(
         for wallpaper in wallpapers.iter() {
             let handle =
                 asset_server.load(format!("image/background/{}.png", wallpaper.wallpaper_name));
-            wallpaper_assets.images.clear();
             wallpaper_assets.images.insert(wallpaper.image_id, handle);
         }
     }
-    //println!("{:?}", wallpaper_assets.images);
     println!("> [load_wallpaper_image] is finished.");
 }
 
 fn in_game_state_to_control(mut in_game_state: ResMut<NextState<InGameState>>) {
-    //Todo state to control
     in_game_state.set(InGameState::Control);
     println!("> InGameState NewGameLoading -> Control");
 }

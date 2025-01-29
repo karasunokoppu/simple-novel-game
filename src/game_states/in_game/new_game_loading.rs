@@ -6,50 +6,65 @@ use crate::{
     game_states::in_game::{
         DisplayImage, ImageData, InGameState, NovelGameStates, StoryDataList, StoryImageList,
         StorySceneData, WallPaperData, WallpaperAssets, Wallpapers,
-    },
+    }, GameState,
 };
 
 use super::{ImageAssets, StoryWallPaperList};
 
 pub fn new_game_loading_plugin(app: &mut App) {
-    app
-        .add_systems(
-            OnEnter(InGameState::NewGameLoading),
-            (
-                deser_text_new_game,
-                deser_image_new_game,
-                deser_wallpaper_image,
-                load_chara_image,
-                load_wallpaper_image,
-                in_game_state_to_control,
-            )
-                .chain(),
+    app.add_systems(
+        OnEnter(InGameState::NewGameLoading),
+        (
+            game_state_to_ingame,
+            reset_datas,
+            deser_text_new_game,
+            deser_image_new_game,
+            deser_wallpaper_image,
+            load_chara_image,
+            load_wallpaper_image,
+            in_game_state_to_control,
         )
-        .add_systems(
-            OnEnter(InGameState::ContinueGameLoading),
-            (
-                deser_text_new_game,
-                deser_image_new_game,
-                deser_wallpaper_image,
-                load_chara_image,
-                load_wallpaper_image,
-                in_game_state_to_control,
-            )
-                .chain(),
-        )
-        .add_systems(
-            OnExit(InGameState::NewGameLoading),
-            despawn_screen::<OnNewGameLoading>,
-        )
-        .add_systems(
-            OnExit(InGameState::ContinueGameLoading),
-            despawn_screen::<OnNewGameLoading>,
-        );
+            .chain(),
+    )
+    // .add_systems(
+    //     OnEnter(InGameState::ContinueGameLoading),
+    //     (
+    //         deser_text_new_game,
+    //         deser_image_new_game,
+    //         deser_wallpaper_image,
+    //         load_chara_image,
+    //         load_wallpaper_image,
+    //         in_game_state_to_control,
+    //     )
+    //         .chain(),
+    // )
+    .add_systems(
+        OnExit(InGameState::NewGameLoading),
+        despawn_screen::<OnNewGameLoading>,
+    );
+    // .add_systems(
+    //     OnExit(InGameState::ContinueGameLoading),
+    //     despawn_screen::<OnNewGameLoading>,
+    // );
 }
 
 // Tag component used to tag entities added on the new_game_loading scene
 #[derive(Component)]
 struct OnNewGameLoading;
+
+fn game_state_to_ingame(
+    mut game_state: ResMut<NextState<GameState>>
+) {
+    game_state.set(GameState::InGame);
+}
+
+fn reset_datas(mut commands: Commands) {
+    commands.insert_resource(StoryDataList::default());
+    commands.insert_resource(StoryImageList::default());
+    commands.insert_resource(ImageAssets::default());
+    commands.insert_resource(StoryWallPaperList::default());
+    commands.insert_resource(WallpaperAssets::default());
+}
 
 fn deser_text_new_game(
     mut data_list: ResMut<StoryDataList>,
@@ -67,8 +82,7 @@ fn deser_text_new_game(
             std::process::exit(1);
         }
     };
-    //println!("{}: {:?}", novel_game_states.story, story_scene_datas);
-    //Todo (ストーリ名、データリスト)のハッシュマップに入れる必要ある？//
+    //TODO [(ストーリ名、データリスト)のハッシュマップに入れる必要ある？]
     data_list
         .story_data_list
         .insert(novel_game_states.story.to_string(), story_scene_datas);
@@ -101,7 +115,6 @@ fn deser_image_new_game(
             std::process::exit(1);
         }
     };
-    //println!("{}: {:?}", novel_game_states.story, vec_image_data);
 
     //display_imageのdeserialize
     let vec_display_image: Vec<DisplayImage> = match ron::de::from_reader(display_image_file) {
@@ -111,7 +124,6 @@ fn deser_image_new_game(
             std::process::exit(1);
         }
     };
-    //println!("{}: {:?}", novel_game_states.story, vec_display_image);
 
     image_list.story_data_list.insert(
         novel_game_states.story.to_string(),
@@ -135,7 +147,6 @@ fn load_chara_image(
             image_assets.images.insert(image_data.image_id, handle);
         }
     }
-    //println!("{:?}", image_assets.images);
     println!("> [load_chara_image] is finished.");
 }
 
@@ -163,7 +174,6 @@ fn deser_wallpaper_image(
             std::process::exit(1);
         }
     };
-    //println!("{}: {:?}", novel_game_states.story, vec_wallpaper_data);
 
     //背景画像関連データのdeserialize
     let vec_image_data: Vec<Wallpapers> = match ron::de::from_reader(wallpaper_file) {
@@ -173,9 +183,8 @@ fn deser_wallpaper_image(
             std::process::exit(1);
         }
     };
-    //println!("{}: {:?}", novel_game_states.story, vec_wallpaper_data);
 
-    //Todo (ストーリ名、データリスト)のハッシュマップに入れる必要ある？//
+    //TODO [(ストーリ名、データリスト)のハッシュマップに入れる必要ある？]
     data_list.story_data_list.insert(
         novel_game_states.story.to_string(),
         (vec_wallpaper_data, vec_image_data),
@@ -195,12 +204,10 @@ fn load_wallpaper_image(
             wallpaper_assets.images.insert(wallpaper.image_id, handle);
         }
     }
-    //println!("{:?}", wallpaper_assets.images);
     println!("> [load_wallpaper_image] is finished.");
 }
 
 fn in_game_state_to_control(mut in_game_state: ResMut<NextState<InGameState>>) {
-    //Todo state to control
     in_game_state.set(InGameState::Control);
     println!("> InGameState NewGameLoading -> Control");
 }

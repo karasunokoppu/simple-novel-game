@@ -1,7 +1,7 @@
+pub mod continue_game_loading;
 pub mod control;
 pub mod draw;
 pub mod new_game_loading;
-pub mod continue_game_loading;
 pub mod pause;
 
 use bevy::prelude::*;
@@ -27,32 +27,28 @@ pub fn game_plugin(app: &mut App) {
             in_game::continue_game_loading::continue_game_loading_plugin,
         ))
         .add_systems(OnEnter(GameState::NewGame), state_to_new_game_loading)
-        .add_systems(
-            OnExit(GameState::NewGame),
-            (despawn_screen::<OnGameScreen>, state_to_disabled),
-        )
-        .add_systems(OnEnter(GameState::ContinueGame), state_to_continue_loading)
-        .add_systems(
-            OnExit(GameState::ContinueGame),
-            (despawn_screen::<OnGameScreen>, state_to_disabled),
-        );
+        .add_systems(OnEnter(GameState::ContinueGame), state_to_continue_loading);
 }
 
-fn state_to_new_game_loading(mut in_game_state: ResMut<NextState<InGameState>>) {
+fn state_to_new_game_loading(
+    mut in_game_state: ResMut<NextState<InGameState>>,
+    mut game_state: ResMut<NextState<GameState>>,
+) {
     in_game_state.set(InGameState::NewGameLoading);
+    // game_state.set(GameState::InGame);
 }
 
-fn state_to_continue_loading(mut in_game_state: ResMut<NextState<InGameState>>) {
+fn state_to_continue_loading(
+    mut in_game_state: ResMut<NextState<InGameState>>,
+    mut game_state: ResMut<NextState<GameState>>,
+) {
     in_game_state.set(InGameState::ContinueGameLoading);
+    // game_state.set(GameState::InGame);
 }
 
 fn state_to_disabled(mut in_game_state: ResMut<NextState<InGameState>>) {
     in_game_state.set(InGameState::Disabled);
 }
-
-// Tag component used to tag entities added on the game screen
-#[derive(Component)]
-struct OnGameScreen;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 enum InGameState {

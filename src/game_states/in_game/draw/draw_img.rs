@@ -3,17 +3,22 @@ use bevy::prelude::*;
 use crate::{
     despawn_screen,
     game_states::in_game::{
-        draw::text, ImageAssets, InGameState, NovelGameStates, StoryImageList, StoryWallPaperList,
-        WallpaperAssets,
+        draw::text, DrawUIState, ImageAssets, NovelGameStates, StoryImageList, StoryWallPaperList, WallpaperAssets
     },
 };
 
 pub fn draw_image_plugin(app: &mut App) {
-    app.add_systems(
-        OnEnter(InGameState::Draw),
+    app
+    .add_systems(
+        OnEnter(DrawUIState::Text),
         setup_draw_image.before(text::setup_text_ui),
     )
-    .add_systems(OnExit(InGameState::Draw), despawn_screen::<OnDrawImage>);
+    .add_systems(
+        OnEnter(DrawUIState::Select),
+        setup_draw_image.before(text::setup_text_ui),
+    )
+    .add_systems(OnExit(DrawUIState::Text), despawn_screen::<OnDrawImage>)
+    .add_systems(OnExit(DrawUIState::Select), despawn_screen::<OnDrawImage>);
 }
 
 #[derive(Component)]

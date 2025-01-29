@@ -78,66 +78,65 @@ fn setup_select_ui(
                 ..default()
             },
             OnSelectUI,
-        )).with_children(|parent| {
-            parent.spawn(Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(80.0),
-                margin: UiRect::vertical(Val::Percent(1.7)),
-                display: Display::Flex,
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::SpaceEvenly,
-                align_items: AlignItems::Center,
-                ..default()
-            }).with_children(|parent| {
-                parent//choice01
-                    .spawn(Node {
-                        ..default()
-                    })
-                    .with_children(|parent| {
-                        parent
-                            .spawn((
-                                Button,
-                                SelectChoice::Choice01,
-                                button_node.clone(),
-                                BorderColor(UI_BORDER_COLOR),
-                                BackgroundColor(UI_BACKGROUND_COLOR),
-                            ))
-                            .with_children(|parent| {
-                                parent.spawn((
-                                    Text::new(choice01_text),
-                                    TextFont {
-                                        font_size: 30.0,
-                                        ..default()
-                                    },
-                                    TextColor(TEXT_COLOR),
-                                ));
-                            });
-                    });
-                parent//choice02
-                    .spawn(Node {
-                        ..default()
-                    })
-                    .with_children(|parent| {
-                        parent
-                            .spawn((
-                                Button,
-                                SelectChoice::Choice02,
-                                button_node.clone(),
-                                BorderColor(UI_BORDER_COLOR),
-                                BackgroundColor(UI_BACKGROUND_COLOR),
-                            ))
-                            .with_children(|parent| {
-                                parent.spawn((
-                                    Text::new(choice02_text),
-                                    TextFont {
-                                        font_size: 30.0,
-                                        ..default()
-                                    },
-                                    TextColor(TEXT_COLOR),
-                                ));
-                            });
-                    });
-            });
+        ))
+        .with_children(|parent| {
+            parent
+                .spawn(Node {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(80.0),
+                    margin: UiRect::vertical(Val::Percent(1.7)),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::SpaceEvenly,
+                    align_items: AlignItems::Center,
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent //choice01
+                        .spawn(Node { ..default() })
+                        .with_children(|parent| {
+                            parent
+                                .spawn((
+                                    Button,
+                                    SelectChoice::Choice01,
+                                    button_node.clone(),
+                                    BorderColor(UI_BORDER_COLOR),
+                                    BackgroundColor(UI_BACKGROUND_COLOR),
+                                ))
+                                .with_children(|parent| {
+                                    parent.spawn((
+                                        Text::new(choice01_text),
+                                        TextFont {
+                                            font_size: 30.0,
+                                            ..default()
+                                        },
+                                        TextColor(TEXT_COLOR),
+                                    ));
+                                });
+                        });
+                    parent //choice02
+                        .spawn(Node { ..default() })
+                        .with_children(|parent| {
+                            parent
+                                .spawn((
+                                    Button,
+                                    SelectChoice::Choice02,
+                                    button_node.clone(),
+                                    BorderColor(UI_BORDER_COLOR),
+                                    BackgroundColor(UI_BACKGROUND_COLOR),
+                                ))
+                                .with_children(|parent| {
+                                    parent.spawn((
+                                        Text::new(choice02_text),
+                                        TextFont {
+                                            font_size: 30.0,
+                                            ..default()
+                                        },
+                                        TextColor(TEXT_COLOR),
+                                    ));
+                                });
+                        });
+                });
         });
 }
 

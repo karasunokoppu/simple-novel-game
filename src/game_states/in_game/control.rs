@@ -48,11 +48,13 @@ fn change_drawui_state(
                         println!("> DrawUIState Disabled -> Select");
                     }
                     SceneType::Finish(finish) => {
-                        if finish.text == "finish" {//終了処理
+                        if finish.text == "finish" {
+                            //終了処理
                             in_game_state.set(InGameState::Disabled);
                             next_draw_ui_state.set(DrawUIState::Disabled);
                             game_state.set(GameState::MainMenu);
 
+                            novel_game_states.story = "story01".to_string();
                             novel_game_states.current_story_id = 1;
                             novel_game_states.next_story_id = 1;
                             //現在のIDを更新
@@ -60,12 +62,14 @@ fn change_drawui_state(
                             println!("> InGameState [] -> Disabled");
                             println!("> DrawUIState Disabled -> Disabled");
                             println!("> GameState NewGame -> MainMenu");
-                        }else {//次のストーリーへ遷移
+                        } else {
+                            //次のストーリーへ遷移
                             novel_game_states.story = finish.text.clone();
                             novel_game_states.current_story_id = 1;
                             novel_game_states.next_story_id = 1;
 
                             in_game_state.set(InGameState::ContinueGameLoading);
+                            game_state.set(GameState::ContinueGame);
                             next_draw_ui_state.set(DrawUIState::Disabled);
                             println!("> InGameState [] -> ContinueGameLoading");
                             println!("> DrawUIState Disabled -> Disabled");
