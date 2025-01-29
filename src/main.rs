@@ -10,8 +10,6 @@ enum GameState {
     #[default]
     Splash,
     MainMenu,
-    NewGame,
-    ContinueGame,
     InGame,
 }
 

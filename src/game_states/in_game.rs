@@ -1,17 +1,16 @@
-pub mod continue_game_loading;
 pub mod control;
 pub mod draw;
-pub mod new_game_loading;
+pub mod loading_game;
 pub mod pause;
 
 use bevy::prelude::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 
-use crate::{despawn_screen, game_states::in_game, GameState};
+use crate::{game_states::in_game, GameState};
 
 pub fn game_plugin(app: &mut App) {
-    app.init_state::<InGameState>()
+    app.init_state::<InGameState>()//TODO [InGameStateの初期化方法をNewGameとContinueで変える必要がある]
         .init_state::<DrawUIState>()
         .init_resource::<StoryDataList>()
         .init_resource::<StoryImageList>()
@@ -23,37 +22,20 @@ pub fn game_plugin(app: &mut App) {
             in_game::control::conrol_scene_plugin,
             in_game::draw::draw_scene_plugin,
             in_game::pause::pause_scene_plugin,
-            in_game::new_game_loading::new_game_loading_plugin,
-            in_game::continue_game_loading::continue_game_loading_plugin,
+            in_game::loading_game::loading_game_plugin,
         ))
-        .add_systems(OnEnter(GameState::NewGame), state_to_new_game_loading)
-        .add_systems(OnEnter(GameState::ContinueGame), state_to_continue_loading);
+        .add_systems(OnEnter(GameState::InGame), state_to_new_game_loading);
 }
 
 fn state_to_new_game_loading(
     mut in_game_state: ResMut<NextState<InGameState>>,
-    mut game_state: ResMut<NextState<GameState>>,
 ) {
-    in_game_state.set(InGameState::NewGameLoading);
-    // game_state.set(GameState::InGame);
-}
-
-fn state_to_continue_loading(
-    mut in_game_state: ResMut<NextState<InGameState>>,
-    mut game_state: ResMut<NextState<GameState>>,
-) {
-    in_game_state.set(InGameState::ContinueGameLoading);
-    // game_state.set(GameState::InGame);
-}
-
-fn state_to_disabled(mut in_game_state: ResMut<NextState<InGameState>>) {
-    in_game_state.set(InGameState::Disabled);
+    in_game_state.set(InGameState::LoadingGame);
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 enum InGameState {
-    NewGameLoading,
-    ContinueGameLoading,
+    LoadingGame,
     Pause,
     Control,
     Draw,

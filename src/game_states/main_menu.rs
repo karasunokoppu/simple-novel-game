@@ -277,11 +277,11 @@ fn menu_action(
                     app_exit_events.send(AppExit::Success);
                 }
                 MenuButtonAction::NewPlay => {
-                    game_state.set(GameState::NewGame);
+                    game_state.set(GameState::InGame);
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::RestartPlay => {
-                    game_state.set(GameState::ContinueGame);
+                    game_state.set(GameState::InGame);
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::Settings => {

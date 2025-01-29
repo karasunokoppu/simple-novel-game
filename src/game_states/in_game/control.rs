@@ -68,8 +68,8 @@ fn change_drawui_state(
                             novel_game_states.current_story_id = 1;
                             novel_game_states.next_story_id = 1;
 
-                            in_game_state.set(InGameState::ContinueGameLoading);
-                            game_state.set(GameState::ContinueGame);
+                            in_game_state.set(InGameState::LoadingGame);
+                            game_state.set(GameState::InGame);
                             next_draw_ui_state.set(DrawUIState::Disabled);
                             println!("> InGameState [] -> ContinueGameLoading");
                             println!("> DrawUIState Disabled -> Disabled");
