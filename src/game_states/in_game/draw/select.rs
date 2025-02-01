@@ -32,7 +32,7 @@ const PRESSED_BUTTON: Color = Color::srgb(0.5, 0.5, 0.5);
 const UI_BORDER_COLOR: Color = Color::srgb(0.8, 0.8, 0.8);
 const UI_BACKGROUND_COLOR: Color = Color::Srgba(Srgba::new(0.2, 0.2, 0.2, 0.8));
 
-fn setup_select_ui(
+pub fn setup_select_ui(
     mut commands: Commands,
     data_list: Res<StoryDataList>,
     novel_game_states: Res<NovelGameStates>,
@@ -138,6 +138,7 @@ fn setup_select_ui(
                         });
                 });
         });
+        println!("setup_select_ui");
 }
 
 fn button_system(
@@ -162,12 +163,8 @@ fn button_system(
                         {
                             novel_game_states.next_story_id = match &story_scene_data.scene_type {
                                 SceneType::Selector(selector) => match select_choice {
-                                    SelectChoice::Choice01 => {
-                                        selector.choice01.next_id as i32
-                                    }
-                                    SelectChoice::Choice02 => {
-                                        selector.choice02.next_id as i32
-                                    }
+                                    SelectChoice::Choice01 => selector.choice01.next_id as i32,
+                                    SelectChoice::Choice02 => selector.choice02.next_id as i32,
                                 },
                                 _ => {
                                     panic!("Wrong SceneType!");

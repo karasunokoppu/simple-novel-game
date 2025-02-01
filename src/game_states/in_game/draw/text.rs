@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::{
     despawn_screen,
     game_states::in_game::{
-        draw::draw_img, DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList,
+        draw::draw_img, pause::PauseButton, DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList
     },
     TEXT_COLOR,
 };
@@ -61,7 +61,6 @@ pub fn setup_text_ui(
                 justify_content: JustifyContent::Center,
                 ..default()
             },
-            Transform::from_xyz(0.0, 0.0, 10.0),
             OnTextUI,
         ))
         .with_children(|parent| {
@@ -139,12 +138,13 @@ pub fn setup_text_ui(
                         });
                 });
         });
+        println!("setup_text_ui");
 }
 
 fn button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<Button>),
+        (Changed<Interaction>, (With<Button>, Without<PauseButton>)),
     >,
     data_list: Res<StoryDataList>,
     mut novel_game_states: ResMut<NovelGameStates>,
@@ -162,9 +162,7 @@ fn button_system(
                         if story_scene_data.current_id == novel_game_states.current_story_id as u32
                         {
                             novel_game_states.next_story_id = match &story_scene_data.scene_type {
-                                SceneType::Text(text) => {
-                                    text.next_id as i32
-                                }
+                                SceneType::Text(text) => text.next_id as i32,
                                 _ => {
                                     panic!("Wrong SceneType!");
                                 }

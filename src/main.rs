@@ -1,12 +1,8 @@
 mod game_states;
 
+use crate::game_states::in_game::{pause::PauseState, DrawUIState, InGameState};
 use bevy::prelude::*;
 use colored::Colorize;
-use crate::game_states::in_game::{
-    InGameState,
-    DrawUIState,
-    pause::PauseState,
-};
 
 const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
@@ -51,12 +47,15 @@ fn main() {
         // Declare the game state, whose starting value is determined by the `Default` trait
         .init_state::<GameState>()
         .add_systems(Startup, setup_camera)
-        .add_systems(Update, (
-            in_game_state_change_detect,
-            game_state_change_detect,
-            draw_ui_state_change_detect,
-            pause_state_change_detect,
-        ))
+        .add_systems(
+            Update,
+            (
+                in_game_state_change_detect,
+                game_state_change_detect,
+                draw_ui_state_change_detect,
+                pause_state_change_detect,
+            ),
+        )
         // Adds the plugins for each state
         .add_plugins((
             game_states::splash::splash_plugin,
@@ -79,12 +78,13 @@ fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands
 
 fn in_game_state_change_detect(
     in_game_states: Res<State<InGameState>>,
-    mut last_state: Local<Option<InGameState>>
-){
+    mut last_state: Local<Option<InGameState>>,
+) {
     if Some(in_game_states.get().clone()) != *last_state {
         *last_state = Some(in_game_states.get().clone());
         let current_state = format!("{:?}", last_state.unwrap());
-        println!("{} {} {} {}",
+        println!(
+            "{} {} {} {}",
             ">",
             "InGameState".blue(),
             "changed to",
@@ -95,12 +95,13 @@ fn in_game_state_change_detect(
 
 fn game_state_change_detect(
     game_states: Res<State<GameState>>,
-    mut last_state: Local<Option<GameState>>
-){
+    mut last_state: Local<Option<GameState>>,
+) {
     if Some(game_states.get().clone()) != *last_state {
         *last_state = Some(game_states.get().clone());
         let current_state = format!("{:?}", last_state.unwrap());
-        println!("{} {} {} {}",
+        println!(
+            "{} {} {} {}",
             ">",
             "GameState".red(),
             "changed to",
@@ -111,12 +112,13 @@ fn game_state_change_detect(
 
 fn draw_ui_state_change_detect(
     game_states: Res<State<DrawUIState>>,
-    mut last_state: Local<Option<DrawUIState>>
-){
+    mut last_state: Local<Option<DrawUIState>>,
+) {
     if Some(game_states.get().clone()) != *last_state {
         *last_state = Some(game_states.get().clone());
         let current_state = format!("{:?}", last_state.unwrap());
-        println!("{} {} {} {}",
+        println!(
+            "{} {} {} {}",
             ">",
             "DrawUIState".green(),
             "changed to",
@@ -127,12 +129,13 @@ fn draw_ui_state_change_detect(
 
 fn pause_state_change_detect(
     game_states: Res<State<PauseState>>,
-    mut last_state: Local<Option<PauseState>>
-){
+    mut last_state: Local<Option<PauseState>>,
+) {
     if Some(game_states.get().clone()) != *last_state {
         *last_state = Some(game_states.get().clone());
         let current_state = format!("{:?}", last_state.unwrap());
-        println!("{} {} {} {}",
+        println!(
+            "{} {} {} {}",
             ">",
             "PauseState".bright_yellow(),
             "changed to",

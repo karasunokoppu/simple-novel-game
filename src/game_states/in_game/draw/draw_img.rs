@@ -3,19 +3,19 @@ use bevy::prelude::*;
 use crate::{
     despawn_screen,
     game_states::in_game::{
-        draw::text, DrawUIState, ImageAssets, NovelGameStates, StoryImageList, StoryWallPaperList, WallpaperAssets
+        draw::text, draw::select, DrawUIState, ImageAssets, NovelGameStates, StoryImageList, StoryWallPaperList,
+        WallpaperAssets,
     },
 };
 
 pub fn draw_image_plugin(app: &mut App) {
-    app
-    .add_systems(
+    app.add_systems(
         OnEnter(DrawUIState::Text),
         setup_draw_image.before(text::setup_text_ui),
     )
     .add_systems(
         OnEnter(DrawUIState::Select),
-        setup_draw_image.before(text::setup_text_ui),
+        setup_draw_image.before(select::setup_select_ui),
     )
     .add_systems(OnExit(DrawUIState::Text), despawn_screen::<OnDrawImage>)
     .add_systems(OnExit(DrawUIState::Select), despawn_screen::<OnDrawImage>);
@@ -188,4 +188,5 @@ pub fn setup_draw_image(
                 parent.spawn(right_node);
             });
         });
+        println!("setup_draw_image");
 }

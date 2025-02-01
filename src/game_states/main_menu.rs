@@ -3,12 +3,16 @@ mod settings;
 use bevy::{app::AppExit, color::palettes::css::CRIMSON, prelude::*};
 
 use crate::{
-    despawn_screen, game_states::main_menu::settings::{
+    despawn_screen,
+    game_states::main_menu::settings::{
         setting_display::{display_settings_menu_setup, OnDisplaySettingsMenuScreen},
         setting_sound::{sound_settings_menu_setup, OnSoundSettingsMenuScreen},
-        setting_story::{get_save_files_names, story_settings_menu_setup, OnStorySettingsMenuScreen, SaveDatas},
+        setting_story::{
+            get_save_files_names, story_settings_menu_setup, OnStorySettingsMenuScreen, SaveDatas,
+        },
         settings_menu_setup, MenuButtonAction, OnSettingsMenuScreen, SelectedOption,
-    }, DisplayQuality, GameState, SelectedStory, Volume, TEXT_COLOR
+    },
+    DisplayQuality, GameState, SelectedStory, Volume, TEXT_COLOR,
 };
 
 //TODO 3.[デザイン変更]
@@ -36,10 +40,7 @@ pub fn menu_plugin(app: &mut App) {
         // Systems to handle the story settings screen
         .add_systems(
             OnEnter(MenuState::SettingsStory),
-            (
-                story_settings_menu_setup,
-                get_save_files_names,
-            ),
+            (story_settings_menu_setup, get_save_files_names),
         )
         .add_systems(
             Update,
@@ -303,9 +304,7 @@ fn menu_action(
                 MenuButtonAction::SettingsStory => {
                     menu_state.set(MenuState::SettingsStory);
                 }
-                MenuButtonAction::Settings => {
-                    menu_state.set(MenuState::Settings)
-                },
+                MenuButtonAction::Settings => menu_state.set(MenuState::Settings),
                 MenuButtonAction::SettingsDisplay => {
                     menu_state.set(MenuState::SettingsDisplay);
                 }

@@ -7,10 +7,13 @@ use bevy::prelude::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 
-use crate::{game_states::in_game, GameState};
+use crate::{game_states::in_game::{
+    self,
+    pause::PauseState,
+}, GameState};
 
 pub fn game_plugin(app: &mut App) {
-    app.init_state::<InGameState>()//TODO 1.[メインメニューからコンティニューボタンを押して入ったときのInGameStateの初期化方法を変える必要がある]
+    app.init_state::<InGameState>() //TODO 1.[メインメニューからコンティニューボタンを押して入ったときのInGameStateの初期化方法を変える必要がある]
         .init_state::<DrawUIState>()
         .init_resource::<StoryDataList>()
         .init_resource::<StoryImageList>()
@@ -24,13 +27,24 @@ pub fn game_plugin(app: &mut App) {
             in_game::pause::pause_scene_plugin,
             in_game::loading_game::loading_game_plugin,
         ))
+        .add_systems(OnEnter(InGameState::Draw), pause_state_to_pause)
+        .add_systems(OnEnter(InGameState::Control), pause_state_to_disabled)
         .add_systems(OnEnter(GameState::InGame), state_to_new_game_loading);
 }
 
-fn state_to_new_game_loading(
-    mut in_game_state: ResMut<NextState<InGameState>>,
-) {
+fn state_to_new_game_loading(mut in_game_state: ResMut<NextState<InGameState>>) {
     in_game_state.set(InGameState::LoadingGame);
+}
+
+fn pause_state_to_pause(
+    mut pause_state: ResMut<NextState<PauseState>>
+){
+    pause_state.set(PauseState::Pause)
+}
+fn pause_state_to_disabled(
+    mut pause_state: ResMut<NextState<PauseState>>
+){
+    pause_state.set(PauseState::Disabled)
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]

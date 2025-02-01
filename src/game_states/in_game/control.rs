@@ -26,7 +26,6 @@ fn change_drawui_state(
     for (_, datas) in data_list.story_data_list.iter() {
         for story_scene_data in datas.iter() {
             if story_scene_data.current_id == novel_game_states.next_story_id as u32 {
-
                 match &story_scene_data.scene_type {
                     SceneType::Text(_) => {
                         in_game_state.set(InGameState::Draw);

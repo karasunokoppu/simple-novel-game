@@ -2,10 +2,8 @@ use bevy::{color::palettes::css::CRIMSON, prelude::*};
 use std::fs;
 
 use crate::{
-    game_states::main_menu::settings::{
-        MenuButtonAction,
-        SelectedOption,
-    }, SelectedStory, TEXT_COLOR
+    game_states::main_menu::settings::{MenuButtonAction, SelectedOption},
+    SelectedStory, TEXT_COLOR,
 };
 
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
@@ -77,8 +75,9 @@ pub fn story_settings_menu_setup(
                         .with_children(|parent| {
                             parent.spawn((Text::new("Volume"), button_text_style.clone()));
 
-//TODO 1.["SelectedStory"の値が変更されたら、該当のセーブデータの内容によって"NovelGameStates"の値が変更されるようにする]
-                            for save_data in 1..(*save_data.0.last().unwrap() + 1) {//TODO 2.[スクロールに変更する]
+                            //TODO 1.["SelectedStory"の値が変更されたら、該当のセーブデータの内容によって"NovelGameStates"の値が変更されるようにする]
+                            for save_data in 1..(*save_data.0.last().unwrap() + 1) {
+                                //TODO 2.[スクロールに変更する]
                                 let mut entity = parent.spawn((
                                     Button,
                                     Node {
@@ -89,44 +88,45 @@ pub fn story_settings_menu_setup(
                                     BackgroundColor(NORMAL_BUTTON),
                                     SelectedStory(save_data),
                                 ));
-                                entity.insert((Text::new(format!("{}", save_data)), button_text_style.clone()));
+                                entity.insert((
+                                    Text::new(format!("{}", save_data)),
+                                    button_text_style.clone(),
+                                ));
                                 if *save_story == SelectedStory(save_data) {
                                     entity.insert(SelectedOption);
                                 }
                             }
                         });
-                    parent.spawn(
-                        Node {
+                    parent
+                        .spawn(Node {
                             display: Display::Flex,
                             flex_direction: FlexDirection::Row,
                             ..default()
-                        }
-                    ).with_children(|parent|{
-                        parent
-                        .spawn((
-                            Button,
-                            button_node.clone(),
-                            BackgroundColor(NORMAL_BUTTON),
-                            MenuButtonAction::RestartPlay,
-                        ))
-                        .with_child((Text::new("Play"), button_text_style.clone()));
-                        parent
-                            .spawn((
-                                Button,
-                                button_node.clone(),
-                                BackgroundColor(NORMAL_BUTTON),
-                                MenuButtonAction::BackToMainMenu,
-                            ))
-                            .with_child((Text::new("Back"), button_text_style.clone()));
+                        })
+                        .with_children(|parent| {
+                            parent
+                                .spawn((
+                                    Button,
+                                    button_node.clone(),
+                                    BackgroundColor(NORMAL_BUTTON),
+                                    MenuButtonAction::RestartPlay,
+                                ))
+                                .with_child((Text::new("Play"), button_text_style.clone()));
+                            parent
+                                .spawn((
+                                    Button,
+                                    button_node.clone(),
+                                    BackgroundColor(NORMAL_BUTTON),
+                                    MenuButtonAction::BackToMainMenu,
+                                ))
+                                .with_child((Text::new("Back"), button_text_style.clone()));
                         });
                 });
         });
 }
 
 //saves内の処理
-pub fn get_save_files_names(
-    mut save_datas: ResMut<SaveDatas>,
-){
+pub fn get_save_files_names(mut save_datas: ResMut<SaveDatas>) {
     let entries = fs::read_dir("saves").unwrap();
     let mut file_names = Vec::new();
 

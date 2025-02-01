@@ -6,14 +6,14 @@ use crate::{
     game_states::in_game::{
         DisplayImage, ImageData, InGameState, NovelGameStates, StoryDataList, StoryImageList,
         StorySceneData, WallPaperData, WallpaperAssets, Wallpapers,
-    }, GameState,
+    },
+    GameState,
 };
 
 use super::{ImageAssets, StoryWallPaperList};
 
 pub fn loading_game_plugin(app: &mut App) {
-    app
-    .add_systems(
+    app.add_systems(
         OnEnter(InGameState::LoadingGame),
         (
             game_state_to_ingame,
@@ -36,9 +36,7 @@ pub fn loading_game_plugin(app: &mut App) {
 // Tag component used to tag entities added on the start_game_loading scene
 #[derive(Component)]
 struct OnContinueGameLoading;
-fn game_state_to_ingame(
-    mut game_state: ResMut<NextState<GameState>>
-) {
+fn game_state_to_ingame(mut game_state: ResMut<NextState<GameState>>) {
     game_state.set(GameState::InGame);
 }
 
