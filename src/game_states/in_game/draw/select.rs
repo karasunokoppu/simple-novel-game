@@ -163,11 +163,9 @@ fn button_system(
                             novel_game_states.next_story_id = match &story_scene_data.scene_type {
                                 SceneType::Selector(selector) => match select_choice {
                                     SelectChoice::Choice01 => {
-                                        println!("next_id is {}", selector.choice01.next_id);
                                         selector.choice01.next_id as i32
                                     }
                                     SelectChoice::Choice02 => {
-                                        println!("next_id is {}", selector.choice02.next_id);
                                         selector.choice02.next_id as i32
                                     }
                                 },
@@ -178,14 +176,9 @@ fn button_system(
                         }
                     }
                 }
-
-                println!("Push select button.");
-
                 //state変更
                 draw_ui_state.set(DrawUIState::Disabled);
                 in_game_state.set(InGameState::Control);
-                println!("> InGameState Draw -> Control");
-                println!("> DrawUIState Select -> Disabled");
             }
             Interaction::Hovered => *background_color = HOVERED_BUTTON.into(),
             Interaction::None => *background_color = UI_BACKGROUND_COLOR.into(),

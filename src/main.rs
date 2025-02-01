@@ -1,6 +1,12 @@
 mod game_states;
 
 use bevy::prelude::*;
+use colored::Colorize;
+use crate::game_states::in_game::{
+    InGameState,
+    DrawUIState,
+    pause::PauseState,
+};
 
 const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
@@ -25,6 +31,9 @@ enum DisplayQuality {
 #[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
 struct Volume(u32);
 
+#[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
+struct SelectedStory(u32);
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -38,9 +47,16 @@ fn main() {
         // Insert as resource the initial value for the settings resources
         .insert_resource(DisplayQuality::Medium)
         .insert_resource(Volume(7))
+        .insert_resource(SelectedStory(1))
         // Declare the game state, whose starting value is determined by the `Default` trait
         .init_state::<GameState>()
         .add_systems(Startup, setup_camera)
+        .add_systems(Update, (
+            in_game_state_change_detect,
+            game_state_change_detect,
+            draw_ui_state_change_detect,
+            pause_state_change_detect,
+        ))
         // Adds the plugins for each state
         .add_plugins((
             game_states::splash::splash_plugin,
@@ -60,3 +76,68 @@ fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands
         commands.entity(entity).despawn_recursive();
     }
 }
+
+fn in_game_state_change_detect(
+    in_game_states: Res<State<InGameState>>,
+    mut last_state: Local<Option<InGameState>>
+){
+    if Some(in_game_states.get().clone()) != *last_state {
+        *last_state = Some(in_game_states.get().clone());
+        let current_state = format!("{:?}", last_state.unwrap());
+        println!("{} {} {} {}",
+            ">",
+            "InGameState".blue(),
+            "changed to",
+            current_state.blue(),
+        );
+    }
+}
+
+fn game_state_change_detect(
+    game_states: Res<State<GameState>>,
+    mut last_state: Local<Option<GameState>>
+){
+    if Some(game_states.get().clone()) != *last_state {
+        *last_state = Some(game_states.get().clone());
+        let current_state = format!("{:?}", last_state.unwrap());
+        println!("{} {} {} {}",
+            ">",
+            "GameState".red(),
+            "changed to",
+            current_state.red(),
+        );
+    }
+}
+
+fn draw_ui_state_change_detect(
+    game_states: Res<State<DrawUIState>>,
+    mut last_state: Local<Option<DrawUIState>>
+){
+    if Some(game_states.get().clone()) != *last_state {
+        *last_state = Some(game_states.get().clone());
+        let current_state = format!("{:?}", last_state.unwrap());
+        println!("{} {} {} {}",
+            ">",
+            "DrawUIState".green(),
+            "changed to",
+            current_state.green(),
+        );
+    }
+}
+
+fn pause_state_change_detect(
+    game_states: Res<State<PauseState>>,
+    mut last_state: Local<Option<PauseState>>
+){
+    if Some(game_states.get().clone()) != *last_state {
+        *last_state = Some(game_states.get().clone());
+        let current_state = format!("{:?}", last_state.unwrap());
+        println!("{} {} {} {}",
+            ">",
+            "PauseState".bright_yellow(),
+            "changed to",
+            current_state.bright_yellow(),
+        );
+    }
+}
+//TODO 2.[各ボタンを押したときに、ターミナルにログが出るようにする]

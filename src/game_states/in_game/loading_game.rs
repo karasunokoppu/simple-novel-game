@@ -50,7 +50,6 @@ fn reset_datas(mut commands: Commands) {
     commands.insert_resource(WallpaperAssets::default());
 }
 
-//TODO [new_game_loading.rsとcontinue_game_loading.rsの共通部分を切り出して統合する]
 fn deser_text_new_game(
     mut data_list: ResMut<StoryDataList>,
     novel_game_states: Res<NovelGameStates>,
@@ -67,12 +66,10 @@ fn deser_text_new_game(
             std::process::exit(1);
         }
     };
-    //TODO [(ストーリ名、データリスト)のハッシュマップに入れる必要ある？]
+    //TODO 3.[(ストーリ名、データリスト)のハッシュマップに入れる必要ある？]
     data_list
         .story_data_list
         .insert(novel_game_states.story.to_string(), story_scene_datas);
-
-    println!("> [deser_text_start_game] is finished.");
 }
 
 fn deser_image_new_game(
@@ -114,8 +111,6 @@ fn deser_image_new_game(
         novel_game_states.story.to_string(),
         (vec_image_data, vec_display_image),
     );
-
-    println!("> [deser_image_start_game] is finished.");
 }
 
 fn load_chara_image(
@@ -132,7 +127,6 @@ fn load_chara_image(
             image_assets.images.insert(image_data.image_id, handle);
         }
     }
-    println!("> [load_chara_image] is finished.");
 }
 
 fn deser_wallpaper_image(
@@ -169,12 +163,11 @@ fn deser_wallpaper_image(
         }
     };
 
-    //TODO [(ストーリ名、データリスト)のハッシュマップに入れる必要ある？]
+    //TODO 3.[(ストーリ名、データリスト)のハッシュマップに入れる必要ある？]
     data_list.story_data_list.insert(
         novel_game_states.story.to_string(),
         (vec_wallpaper_data, vec_image_data),
     );
-    println!("> [deser_wallpaper_image] is finished.");
 }
 
 fn load_wallpaper_image(
@@ -189,10 +182,8 @@ fn load_wallpaper_image(
             wallpaper_assets.images.insert(wallpaper.image_id, handle);
         }
     }
-    println!("> [load_wallpaper_image] is finished.");
 }
 
 fn in_game_state_to_control(mut in_game_state: ResMut<NextState<InGameState>>) {
     in_game_state.set(InGameState::Control);
-    println!("> InGameState NewGameLoading -> Control");
 }

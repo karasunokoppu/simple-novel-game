@@ -20,7 +20,7 @@ pub fn text_ui_plugin(app: &mut App) {
 #[derive(Component)]
 struct OnTextUI;
 
-//TODO [色のテーマを一元管理するようにする]
+//TODO 2.[色のテーマを一元管理するようにする]
 //Color
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
 const PRESSED_BUTTON: Color = Color::srgb(0.5, 0.5, 0.5);
@@ -163,7 +163,6 @@ fn button_system(
                         {
                             novel_game_states.next_story_id = match &story_scene_data.scene_type {
                                 SceneType::Text(text) => {
-                                    println!("next_id is {}", text.next_id);
                                     text.next_id as i32
                                 }
                                 _ => {
@@ -173,14 +172,9 @@ fn button_system(
                         }
                     }
                 }
-
-                println!("Push text button.");
-
                 //state変更
                 in_game_state.set(InGameState::Control);
                 draw_ui_state.set(DrawUIState::Disabled);
-                println!("> InGameState Draw -> Control");
-                println!("> DrawUIState Text -> Disabled");
             }
             Interaction::Hovered => *background_color = HOVERED_BUTTON.into(),
             Interaction::None => *background_color = UI_BACKGROUND_COLOR.into(),

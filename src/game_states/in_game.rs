@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use crate::{game_states::in_game, GameState};
 
 pub fn game_plugin(app: &mut App) {
-    app.init_state::<InGameState>()//TODO [InGameStateの初期化方法をNewGameとContinueで変える必要がある]
+    app.init_state::<InGameState>()//TODO 1.[メインメニューからコンティニューボタンを押して入ったときのInGameStateの初期化方法を変える必要がある]
         .init_state::<DrawUIState>()
         .init_resource::<StoryDataList>()
         .init_resource::<StoryImageList>()
@@ -34,9 +34,8 @@ fn state_to_new_game_loading(
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-enum InGameState {
+pub enum InGameState {
     LoadingGame,
-    Pause,
     Control,
     Draw,
     #[default]

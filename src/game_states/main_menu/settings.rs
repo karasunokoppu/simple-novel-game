@@ -1,5 +1,6 @@
 pub mod setting_display;
 pub mod setting_sound;
+pub mod setting_story;
 
 use crate::TEXT_COLOR;
 use bevy::{color::palettes::css::CRIMSON, prelude::*};
@@ -20,6 +21,7 @@ pub enum MenuButtonAction {
     NewPlay,
     RestartPlay,
     Settings,
+    SettingsStory,
     SettingsDisplay,
     SettingsSound,
     BackToMainMenu,

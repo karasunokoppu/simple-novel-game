@@ -3,16 +3,15 @@ mod settings;
 use bevy::{app::AppExit, color::palettes::css::CRIMSON, prelude::*};
 
 use crate::{
-    despawn_screen,
-    game_states::main_menu::settings::{
+    despawn_screen, game_states::main_menu::settings::{
         setting_display::{display_settings_menu_setup, OnDisplaySettingsMenuScreen},
         setting_sound::{sound_settings_menu_setup, OnSoundSettingsMenuScreen},
+        setting_story::{get_save_files_names, story_settings_menu_setup, OnStorySettingsMenuScreen, SaveDatas},
         settings_menu_setup, MenuButtonAction, OnSettingsMenuScreen, SelectedOption,
-    },
-    DisplayQuality, GameState, Volume, TEXT_COLOR,
+    }, DisplayQuality, GameState, SelectedStory, Volume, TEXT_COLOR
 };
 
-//TODO [デザイン変更]
+//TODO 3.[デザイン変更]
 // This plugin manages the menu, with 5 different screens:
 // - a main menu with "New Game", "Settings", "Quit"
 // - a settings menu with two submenus and a back button
@@ -23,6 +22,7 @@ pub fn menu_plugin(app: &mut App) {
         // entering the `GameState::Menu` state.
         // Current screen in the menu is handled by an independent state from `GameState`
         .init_state::<MenuState>()
+        .init_resource::<SaveDatas>()
         .add_systems(OnEnter(GameState::MainMenu), menu_setup)
         // Systems to handle the main menu screen
         .add_systems(OnEnter(MenuState::Main), main_menu_setup)
@@ -32,6 +32,22 @@ pub fn menu_plugin(app: &mut App) {
         .add_systems(
             OnExit(MenuState::Settings),
             despawn_screen::<OnSettingsMenuScreen>,
+        )
+        // Systems to handle the story settings screen
+        .add_systems(
+            OnEnter(MenuState::SettingsStory),
+            (
+                story_settings_menu_setup,
+                get_save_files_names,
+            ),
+        )
+        .add_systems(
+            Update,
+            (setting_button::<SelectedStory>.run_if(in_state(MenuState::SettingsStory)),),
+        )
+        .add_systems(
+            OnExit(MenuState::SettingsStory),
+            despawn_screen::<OnStorySettingsMenuScreen>,
         )
         // Systems to handle the display settings screen
         .add_systems(
@@ -68,6 +84,7 @@ pub fn menu_plugin(app: &mut App) {
 enum MenuState {
     Main,
     Settings,
+    SettingsStory,
     SettingsDisplay,
     SettingsSound,
     #[default]
@@ -212,7 +229,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             Button,
                             button_node.clone(),
                             BackgroundColor(NORMAL_BUTTON),
-                            MenuButtonAction::RestartPlay,
+                            MenuButtonAction::SettingsStory,
                         ))
                         .with_children(|parent| {
                             let icon = asset_server.load("image/icons/UI_Icon/right.png");
@@ -260,7 +277,6 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 //ボタン押下による画面遷移
-//TODO [continue Game時にストーリーシーンを選べるようにする]
 fn menu_action(
     interaction_query: Query<
         (&Interaction, &MenuButtonAction),
@@ -283,6 +299,9 @@ fn menu_action(
                 MenuButtonAction::RestartPlay => {
                     game_state.set(GameState::InGame);
                     menu_state.set(MenuState::Disabled);
+                }
+                MenuButtonAction::SettingsStory => {
+                    menu_state.set(MenuState::SettingsStory);
                 }
                 MenuButtonAction::Settings => {
                     menu_state.set(MenuState::Settings)
