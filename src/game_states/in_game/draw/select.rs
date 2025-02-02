@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::{
     despawn_screen,
     game_states::in_game::{
-        draw::draw_img, DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList,
+        draw::draw_img, DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList,pause::PuaseButtonState,
     },
     TEXT_COLOR,
 };
@@ -150,35 +150,40 @@ fn button_system(
     mut novel_game_states: ResMut<NovelGameStates>,
     mut in_game_state: ResMut<NextState<InGameState>>,
     mut draw_ui_state: ResMut<NextState<DrawUIState>>,
+    pause_button_state: Res<State<PuaseButtonState>>,
 ) {
-    for (interaction, mut background_color, select_choice) in &mut interaction_query {
-        match *interaction {
-            Interaction::Pressed => {
-                *background_color = PRESSED_BUTTON.into();
-
-                //next_idを変更
-                for (_, datas) in data_list.story_data_list.iter() {
-                    for story_scene_data in datas.iter() {
-                        if story_scene_data.current_id == novel_game_states.current_story_id as u32
-                        {
-                            novel_game_states.next_story_id = match &story_scene_data.scene_type {
-                                SceneType::Selector(selector) => match select_choice {
-                                    SelectChoice::Choice01 => selector.choice01.next_id as i32,
-                                    SelectChoice::Choice02 => selector.choice02.next_id as i32,
-                                },
-                                _ => {
-                                    panic!("Wrong SceneType!");
+    match *pause_button_state.get() {
+        PuaseButtonState::NotPressed => {
+            for (interaction, mut background_color, select_choice) in &mut interaction_query {
+                match *interaction {
+                    Interaction::Pressed => {
+                        *background_color = PRESSED_BUTTON.into();
+                        //next_idを変更
+                        for (_, datas) in data_list.story_data_list.iter() {
+                            for story_scene_data in datas.iter() {
+                                if story_scene_data.current_id == novel_game_states.current_story_id as u32
+                                {
+                                    novel_game_states.next_story_id = match &story_scene_data.scene_type {
+                                        SceneType::Selector(selector) => match select_choice {
+                                            SelectChoice::Choice01 => selector.choice01.next_id as i32,
+                                            SelectChoice::Choice02 => selector.choice02.next_id as i32,
+                                        },
+                                        _ => {
+                                            panic!("Wrong SceneType!");
+                                        }
+                                    }
                                 }
                             }
                         }
+                        //state変更
+                        draw_ui_state.set(DrawUIState::Disabled);
+                        in_game_state.set(InGameState::Control);
                     }
+                    Interaction::Hovered => *background_color = HOVERED_BUTTON.into(),
+                    Interaction::None => *background_color = UI_BACKGROUND_COLOR.into(),
                 }
-                //state変更
-                draw_ui_state.set(DrawUIState::Disabled);
-                in_game_state.set(InGameState::Control);
             }
-            Interaction::Hovered => *background_color = HOVERED_BUTTON.into(),
-            Interaction::None => *background_color = UI_BACKGROUND_COLOR.into(),
         }
+        PuaseButtonState::Pressed => {}
     }
 }

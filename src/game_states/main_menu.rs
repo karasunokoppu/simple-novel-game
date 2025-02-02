@@ -124,17 +124,19 @@ fn button_system(
 // the button as the one currently selected
 fn setting_button<T: Resource + Component + PartialEq + Copy>(
     interaction_query: Query<(&Interaction, &T, Entity), (Changed<Interaction>, With<Button>)>,
-    selected_query: Single<(Entity, &mut BackgroundColor), With<SelectedOption>>,
+    mut selected_query: Query<(Entity, &mut BackgroundColor), With<SelectedOption>>,
     mut commands: Commands,
     mut setting: ResMut<T>,
 ) {
-    let (previous_button, mut previous_button_color) = selected_query.into_inner();
-    for (interaction, button_setting, entity) in &interaction_query {
-        if *interaction == Interaction::Pressed && *setting != *button_setting {
-            *previous_button_color = NORMAL_BUTTON.into();
-            commands.entity(previous_button).remove::<SelectedOption>();
-            commands.entity(entity).insert(SelectedOption);
-            *setting = *button_setting;
+    if !selected_query.is_empty() {
+        let (previous_button, mut previous_button_color) = selected_query.single_mut();
+        for (interaction, button_setting, entity) in &interaction_query {
+            if *interaction == Interaction::Pressed && *setting != *button_setting {
+                *previous_button_color = NORMAL_BUTTON.into();
+                commands.entity(previous_button).remove::<SelectedOption>();
+                commands.entity(entity).insert(SelectedOption);
+                *setting = *button_setting;
+            }
         }
     }
 }

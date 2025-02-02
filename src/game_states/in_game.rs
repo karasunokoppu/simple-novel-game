@@ -4,6 +4,7 @@ pub mod loading_game;
 pub mod pause;
 
 use bevy::prelude::*;
+use pause::PuaseButtonState;
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -15,6 +16,7 @@ use crate::{game_states::in_game::{
 pub fn game_plugin(app: &mut App) {
     app.init_state::<InGameState>() //TODO 1.[メインメニューからコンティニューボタンを押して入ったときのInGameStateの初期化方法を変える必要がある]
         .init_state::<DrawUIState>()
+        .init_state::<PuaseButtonState>()
         .init_resource::<StoryDataList>()
         .init_resource::<StoryImageList>()
         .init_resource::<StoryWallPaperList>()
@@ -27,8 +29,9 @@ pub fn game_plugin(app: &mut App) {
             in_game::pause::pause_scene_plugin,
             in_game::loading_game::loading_game_plugin,
         ))
+        //Pause state
         .add_systems(OnEnter(InGameState::Draw), pause_state_to_pause)
-        .add_systems(OnEnter(InGameState::Control), pause_state_to_disabled)
+        .add_systems(OnExit(InGameState::Draw), pause_state_to_disabled)
         .add_systems(OnEnter(GameState::InGame), state_to_new_game_loading);
 }
 

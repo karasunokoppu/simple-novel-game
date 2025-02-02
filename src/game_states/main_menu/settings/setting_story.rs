@@ -1,4 +1,4 @@
-use bevy::{color::palettes::css::CRIMSON, prelude::*};
+use bevy::{color::palettes::css::CRIMSON, prelude::*, render::render_resource::encase::private::Length};
 use std::fs;
 
 use crate::{
@@ -75,8 +75,9 @@ pub fn story_settings_menu_setup(
                         .with_children(|parent| {
                             parent.spawn((Text::new("Volume"), button_text_style.clone()));
 
-                            //TODO 1.["SelectedStory"の値が変更されたら、該当のセーブデータの内容によって"NovelGameStates"の値が変更されるようにする]
-                            for save_data in 1..(*save_data.0.last().unwrap() + 1) {
+                            if save_data.0.length() > 0 {
+                                //TODO 1.["SelectedStory"の値が変更されたら、該当のセーブデータの内容によって"NovelGameStates"の値が変更されるようにする]
+                            for save_data_iter in 1..(*save_data.0.last().unwrap() + 1) {
                                 //TODO 2.[スクロールに変更する]
                                 let mut entity = parent.spawn((
                                     Button,
@@ -86,16 +87,18 @@ pub fn story_settings_menu_setup(
                                         ..button_node.clone()
                                     },
                                     BackgroundColor(NORMAL_BUTTON),
-                                    SelectedStory(save_data),
+                                    SelectedStory(save_data_iter),
                                 ));
                                 entity.insert((
-                                    Text::new(format!("{}", save_data)),
+                                    Text::new(format!("{}", save_data_iter)),
                                     button_text_style.clone(),
                                 ));
-                                if *save_story == SelectedStory(save_data) {
+                                if *save_story == SelectedStory(save_data_iter) {
                                     entity.insert(SelectedOption);
                                 }
                             }
+                            }
+                            println!("{}", save_data.0.length());
                         });
                     parent
                         .spawn(Node {

@@ -4,10 +4,14 @@ use crate::despawn_screen;
 
 pub fn pause_scene_plugin(app: &mut App) {
     app.init_state::<PauseState>()
-        .add_systems(OnEnter(PauseState::Pause), setup_pause_ui)
-        // .add_systems(OnEnter(DrawUIState::Select), setup_pause_ui)
+        .add_systems(OnEnter(PauseState::Pause), (
+            setup_pause_ui,
+        ))
         .add_systems(Update, pause_button_system.run_if(in_state(PauseState::Pause)))
+        .add_systems(OnEnter(PuaseButtonState::Pressed), flip_to_pause_node)
+        .add_systems(OnEnter(PuaseButtonState::NotPressed), flip_to_not_pause_node)
         .add_systems(OnExit(PauseState::Pause), despawn_screen::<OnPause>);
+        //.add_systems(OnExit(PuaseButtonState::NotPressed), despawn_screen::<PauseButtonState>);
 }
 //TODO 1.[pause時にセーブしたらsavesディレクトリに[数字].ronファイルを生成するようにする]
 
@@ -16,7 +20,13 @@ pub fn pause_scene_plugin(app: &mut App) {
 struct OnPause;
 
 #[derive(Component)]
-pub struct PauseButton;
+pub struct PauseButtonMarker;
+
+#[derive(Component)]
+struct PauseButtonPauseMarker;
+
+#[derive(Component)]
+struct PauseButtonNotPauseMarker;
 
 //
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -24,6 +34,13 @@ pub enum PauseState {
     Pause,
     #[default]
     Disabled,
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum PuaseButtonState{
+    Pressed,
+    #[default]
+    NotPressed,
 }
 
 //Color
@@ -43,37 +60,26 @@ fn setup_pause_ui(mut commands: Commands) {
                 ..default()
             },
             Transform::from_xyz(0.0, 0.0, 1000.0),
-            OnPause,
+            OnPause,PauseButtonPauseMarker,
         ))
         .with_children(|parent| {
             parent.spawn((
                 Node {
-                    width: Val::Px(30.0),
+                    width: Val::Px(60.0),
                     height: Val::Px(30.0),
+                    padding: UiRect::all(Val::Px(10.0)),
+                    border: UiRect::new(
+                        Val::Px(3.0),
+                        Val::Px(3.0),
+                        Val::Px(3.0),
+                        Val::Px(3.0),
+                    ),
                     ..default()
                 },
-                BackgroundColor(Color::WHITE),
-            )).with_children(|parent| {
-                parent.spawn((
-                    //セリフ
-                    Node {
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        padding: UiRect::all(Val::Px(10.0)),
-                        justify_items: JustifyItems::End,
-                        border: UiRect::new(
-                            Val::Px(3.0),
-                            Val::Px(3.0),
-                            Val::Px(3.0),
-                            Val::Px(3.0),
-                        ),
-                        ..default()
-                    },
-                    BorderColor(UI_BORDER_COLOR),
-                    BackgroundColor(UI_BACKGROUND_COLOR),
-                    Button,PauseButton
-                ));
-            });
+                BorderColor(UI_BORDER_COLOR),
+                BackgroundColor(UI_BACKGROUND_COLOR),
+                Button,PauseButtonMarker
+            ));
         });
     println!("Pause ui is spawned");
 }
@@ -81,15 +87,112 @@ fn setup_pause_ui(mut commands: Commands) {
 fn pause_button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, (With<Button>, With<PauseButton>)),
+        (Changed<Interaction>, (With<Button>, With<PauseButtonMarker>)),
     >,
+    pause_button_state: Res<State<PuaseButtonState>>,
+    mut next_pause_button_state: ResMut<NextState<PuaseButtonState>>
 ) {
     for (interaction, mut background_color) in &mut interaction_query {
         match *interaction {
-            Interaction::Pressed => *background_color = PRESSED_BUTTON.into(),
+            Interaction::Pressed => {
+                *background_color = PRESSED_BUTTON.into();
+                match *pause_button_state.get() {
+                    PuaseButtonState::Pressed => {
+                        next_pause_button_state.set(PuaseButtonState::NotPressed)
+                    }
+                    PuaseButtonState::NotPressed => {
+                        next_pause_button_state.set(PuaseButtonState::Pressed)
+                    }
+                }
+            },
             Interaction::Hovered => *background_color = HOVERED_BUTTON.into(),
-            Interaction::None => *background_color = UI_BACKGROUND_COLOR.into(),
+            Interaction::None => {
+                match *pause_button_state.get() {
+                    PuaseButtonState::Pressed => {
+                        *background_color = BackgroundColor(Color::srgb(1.0, 0.0, 0.0));
+                    }
+                    PuaseButtonState::NotPressed => {
+                        *background_color = BackgroundColor(Color::srgb(0.0, 0.0, 1.0));
+                    }
+                }
+            },
         }
     }
 }
 
+fn flip_to_pause_node(
+    mut commands: Commands,
+    pause_entities: Query<Entity, With<PauseButtonPauseMarker>>,
+    pause_button_entities: Query<Entity, With<PauseButtonMarker>>
+) {
+    let added_node = commands.spawn((
+        Node{
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            ..default()
+        },
+        BackgroundColor(Color::WHITE),
+        PauseButtonNotPauseMarker,
+    )).with_children(|parent|{
+        parent.spawn((
+            Node {
+                width: Val::Px(60.0),
+                height: Val::Px(30.0),
+                padding: UiRect::all(Val::Px(10.0)),
+                justify_items: JustifyItems::End,
+                border: UiRect::new(
+                    Val::Px(3.0),
+                    Val::Px(3.0),
+                    Val::Px(3.0),
+                    Val::Px(3.0),
+                ),
+                ..default()
+            },
+            BorderColor(UI_BORDER_COLOR),
+            BackgroundColor(UI_BACKGROUND_COLOR),
+            Button,PauseButtonMarker
+        ));
+    }).id();
+
+    for pause_entity in pause_button_entities.iter(){
+        commands.entity(pause_entity).despawn();
+    }
+
+    for pause_entity in pause_entities.iter(){
+        commands.entity(pause_entity).insert_children(0, &[added_node]);
+    }
+}
+
+fn flip_to_not_pause_node(
+    mut commands: Commands,
+    pause_entities: Query<Entity, With<PauseButtonPauseMarker>>,
+    not_pause_button_entities: Query<Entity, With<PauseButtonNotPauseMarker>>
+) {
+    let added_node = commands.spawn((
+        Node {
+            width: Val::Px(60.0),
+            height: Val::Px(30.0),
+            padding: UiRect::all(Val::Px(10.0)),
+            border: UiRect::new(
+                Val::Px(3.0),
+                Val::Px(3.0),
+                Val::Px(3.0),
+                Val::Px(3.0),
+            ),
+            ..default()
+        },
+        BorderColor(UI_BORDER_COLOR),
+        BackgroundColor(UI_BACKGROUND_COLOR),
+        Button,PauseButtonMarker
+    )).id();
+
+    if !not_pause_button_entities.is_empty() {
+        for pause_entity in not_pause_button_entities.iter(){
+            commands.entity(pause_entity).despawn();
+        }
+    }
+
+    for pause_entity in pause_entities.iter(){
+        commands.entity(pause_entity).insert_children(0, &[added_node]);
+    }
+}
