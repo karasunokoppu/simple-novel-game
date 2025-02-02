@@ -8,10 +8,10 @@ use pause::PuaseButtonState;
 use serde::Deserialize;
 use std::collections::HashMap;
 
-use crate::{game_states::in_game::{
-    self,
-    pause::PauseState,
-}, GameState};
+use crate::{
+    game_states::in_game::{self, pause::PauseState},
+    GameState,
+};
 
 pub fn game_plugin(app: &mut App) {
     app.init_state::<InGameState>() //TODO 1.[メインメニューからコンティニューボタンを押して入ったときのInGameStateの初期化方法を変える必要がある]
@@ -39,14 +39,10 @@ fn state_to_new_game_loading(mut in_game_state: ResMut<NextState<InGameState>>) 
     in_game_state.set(InGameState::LoadingGame);
 }
 
-fn pause_state_to_pause(
-    mut pause_state: ResMut<NextState<PauseState>>
-){
+fn pause_state_to_pause(mut pause_state: ResMut<NextState<PauseState>>) {
     pause_state.set(PauseState::Pause)
 }
-fn pause_state_to_disabled(
-    mut pause_state: ResMut<NextState<PauseState>>
-){
+fn pause_state_to_disabled(mut pause_state: ResMut<NextState<PauseState>>) {
     pause_state.set(PauseState::Disabled)
 }
 

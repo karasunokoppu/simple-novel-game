@@ -1,4 +1,6 @@
-use bevy::{color::palettes::css::CRIMSON, prelude::*, render::render_resource::encase::private::Length};
+use bevy::{
+    color::palettes::css::CRIMSON, prelude::*, render::render_resource::encase::private::Length,
+};
 use std::fs;
 
 use crate::{
@@ -77,26 +79,26 @@ pub fn story_settings_menu_setup(
 
                             if save_data.0.length() > 0 {
                                 //TODO 1.["SelectedStory"の値が変更されたら、該当のセーブデータの内容によって"NovelGameStates"の値が変更されるようにする]
-                            for save_data_iter in 1..(*save_data.0.last().unwrap() + 1) {
-                                //TODO 2.[スクロールに変更する]
-                                let mut entity = parent.spawn((
-                                    Button,
-                                    Node {
-                                        width: Val::Px(30.0),
-                                        height: Val::Px(65.0),
-                                        ..button_node.clone()
-                                    },
-                                    BackgroundColor(NORMAL_BUTTON),
-                                    SelectedStory(save_data_iter),
-                                ));
-                                entity.insert((
-                                    Text::new(format!("{}", save_data_iter)),
-                                    button_text_style.clone(),
-                                ));
-                                if *save_story == SelectedStory(save_data_iter) {
-                                    entity.insert(SelectedOption);
+                                for save_data_iter in 1..(*save_data.0.last().unwrap() + 1) {
+                                    //TODO 2.[スクロールに変更する]
+                                    let mut entity = parent.spawn((
+                                        Button,
+                                        Node {
+                                            width: Val::Px(30.0),
+                                            height: Val::Px(65.0),
+                                            ..button_node.clone()
+                                        },
+                                        BackgroundColor(NORMAL_BUTTON),
+                                        SelectedStory(save_data_iter),
+                                    ));
+                                    entity.insert((
+                                        Text::new(format!("{}", save_data_iter)),
+                                        button_text_style.clone(),
+                                    ));
+                                    if *save_story == SelectedStory(save_data_iter) {
+                                        entity.insert(SelectedOption);
+                                    }
                                 }
-                            }
                             }
                             println!("{}", save_data.0.length());
                         });

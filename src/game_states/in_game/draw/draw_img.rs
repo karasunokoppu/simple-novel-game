@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use crate::{
     despawn_screen,
     game_states::in_game::{
-        draw::text, draw::select, DrawUIState, ImageAssets, NovelGameStates, StoryImageList, StoryWallPaperList,
-        WallpaperAssets,
+        draw::select, draw::text, DrawUIState, ImageAssets, NovelGameStates, StoryImageList,
+        StoryWallPaperList, WallpaperAssets,
     },
 };
 
@@ -188,5 +188,5 @@ pub fn setup_draw_image(
                 parent.spawn(right_node);
             });
         });
-        println!("setup_draw_image");
+    println!("setup_draw_image");
 }

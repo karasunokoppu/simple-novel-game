@@ -3,7 +3,8 @@ use bevy::prelude::*;
 use crate::{
     despawn_screen,
     game_states::in_game::{
-        draw::draw_img, DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList,pause::PuaseButtonState,
+        draw::draw_img, pause::PuaseButtonState, DrawUIState, InGameState, NovelGameStates,
+        SceneType, StoryDataList,
     },
     TEXT_COLOR,
 };
@@ -138,7 +139,7 @@ pub fn setup_select_ui(
                         });
                 });
         });
-        println!("setup_select_ui");
+    println!("setup_select_ui");
 }
 
 fn button_system(
@@ -161,17 +162,23 @@ fn button_system(
                         //next_idを変更
                         for (_, datas) in data_list.story_data_list.iter() {
                             for story_scene_data in datas.iter() {
-                                if story_scene_data.current_id == novel_game_states.current_story_id as u32
+                                if story_scene_data.current_id
+                                    == novel_game_states.current_story_id as u32
                                 {
-                                    novel_game_states.next_story_id = match &story_scene_data.scene_type {
-                                        SceneType::Selector(selector) => match select_choice {
-                                            SelectChoice::Choice01 => selector.choice01.next_id as i32,
-                                            SelectChoice::Choice02 => selector.choice02.next_id as i32,
-                                        },
-                                        _ => {
-                                            panic!("Wrong SceneType!");
+                                    novel_game_states.next_story_id =
+                                        match &story_scene_data.scene_type {
+                                            SceneType::Selector(selector) => match select_choice {
+                                                SelectChoice::Choice01 => {
+                                                    selector.choice01.next_id as i32
+                                                }
+                                                SelectChoice::Choice02 => {
+                                                    selector.choice02.next_id as i32
+                                                }
+                                            },
+                                            _ => {
+                                                panic!("Wrong SceneType!");
+                                            }
                                         }
-                                    }
                                 }
                             }
                         }
