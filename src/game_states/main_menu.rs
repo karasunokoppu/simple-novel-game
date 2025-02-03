@@ -1,4 +1,4 @@
-mod settings;
+pub mod settings;
 
 use bevy::{app::AppExit, color::palettes::css::CRIMSON, prelude::*};
 
@@ -82,7 +82,7 @@ pub fn menu_plugin(app: &mut App) {
 
 // State used for the current menu screen
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-enum MenuState {
+pub enum MenuState {
     Main,
     Settings,
     SettingsStory,
@@ -103,7 +103,7 @@ const PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
 
 //マウスの状態の動作によって、ボタンの色を変える
 // This system handles changing all buttons color based on mouse interaction
-fn button_system(
+pub fn button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, Option<&SelectedOption>),
         (Changed<Interaction>, With<Button>),

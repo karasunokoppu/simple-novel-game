@@ -1,21 +1,41 @@
+pub mod in_pause;
+
 use bevy::prelude::*;
 
-use crate::despawn_screen;
+use crate::{
+    despawn_screen,
+    game_states::main_menu::{
+        settings::MenuButtonAction,
+        MenuState,
+    },
+};
 
 pub fn pause_scene_plugin(app: &mut App) {
     app.init_state::<PauseState>()
         .add_systems(OnEnter(PauseState::Pause), (setup_pause_ui,))
-        .add_systems(OnEnter(PuaseButtonState::Pressed), flip_to_pause_node)
+        .add_systems(
+            OnEnter(PuaseButtonState::Pressed),
+            (
+                flip_to_pause_node,
+                flip_ui_to_not_visible
+            )
+            )
         .add_systems(
             OnEnter(PuaseButtonState::NotPressed),
-            flip_to_not_pause_node.run_if(in_state(PauseState::Pause)),
+            (
+                flip_to_not_pause_node,
+                flip_ui_to_visible
+            ).run_if(in_state(PauseState::Pause)),
         )
         .add_systems(
             Update,
-            (pause_button_system, in_pause_button_system).run_if(in_state(PauseState::Pause)),
+            (
+                pause_button_system,
+                in_pause_button_system,
+                in_pause_in_save_button_system,
+            ).run_if(in_state(PauseState::Pause)),
         )
         .add_systems(OnExit(PauseState::Pause), despawn_screen::<OnPause>);
-    //.add_systems(OnExit(PuaseButtonState::NotPressed), despawn_screen::<PauseButtonState>);
 }
 //TODO 1.[pause時にセーブしたらsavesディレクトリに[数字].ronファイルを生成するようにする]
 
@@ -31,6 +51,8 @@ struct PauseButtonPauseMarker;
 
 #[derive(Component)]
 struct PauseButtonNotPauseMarker;
+#[derive(Component)]
+pub struct FlipVisibilityMarker;
 
 //
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -45,6 +67,14 @@ pub enum PuaseButtonState {
     Pressed,
     #[default]
     NotPressed,
+}
+
+
+
+#[derive(Component)]
+enum InPauseButtonAction{
+    Save,
+    Load,
 }
 
 //Color
@@ -85,6 +115,21 @@ fn setup_pause_ui(mut commands: Commands) {
     println!("Pause ui is spawned");
 }
 
+fn flip_ui_to_visible(
+    mut test_ui: Query<(&mut Node, &FlipVisibilityMarker)>,
+){
+    for (mut node, _) in test_ui.iter_mut(){
+        node.display = Display::Flex;
+    }
+}
+fn flip_ui_to_not_visible(
+    mut test_ui: Query<(&mut Node, &FlipVisibilityMarker)>,
+){
+    for (mut node, _) in test_ui.iter_mut(){
+        node.display = Display::None;
+    }
+}
+
 fn pause_button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
@@ -95,6 +140,7 @@ fn pause_button_system(
     >,
     pause_button_state: Res<State<PuaseButtonState>>,
     mut next_pause_button_state: ResMut<NextState<PuaseButtonState>>,
+
 ) {
     for (interaction, mut background_color) in &mut interaction_query {
         match *interaction {
@@ -109,14 +155,11 @@ fn pause_button_system(
                     }
                 }
             }
-            Interaction::Hovered => *background_color = HOVERED_BUTTON.into(),
-            Interaction::None => match *pause_button_state.get() {
-                PuaseButtonState::Pressed => {
-                    *background_color = BackgroundColor(Color::srgb(1.0, 0.0, 0.0));
-                }
-                PuaseButtonState::NotPressed => {
-                    *background_color = BackgroundColor(Color::srgb(0.0, 0.0, 1.0));
-                }
+            Interaction::Hovered => {
+                *background_color = HOVERED_BUTTON.into();
+            },
+            Interaction::None => {
+                *background_color = UI_BACKGROUND_COLOR.into();
             },
         }
     }
@@ -124,18 +167,56 @@ fn pause_button_system(
 
 fn in_pause_button_system(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
+        (&Interaction, &mut BackgroundColor, &InPauseButtonAction),
         (
             Changed<Interaction>,
             (With<Button>, With<PauseButtonNotPauseMarker>),
         ),
     >,
+    mut menu_state: ResMut<NextState<MenuState>>,
 ) {
-    for (interaction, mut background_color) in &mut interaction_query {
+    for (interaction, mut background_color, in_pause_button_acrion) in &mut interaction_query {
         match *interaction {
-            Interaction::Pressed => *background_color = PRESSED_BUTTON.into(),
+            Interaction::Pressed => {
+                *background_color = PRESSED_BUTTON.into();
+
+                match in_pause_button_acrion {
+                    InPauseButtonAction::Save => {
+                        menu_state.set(MenuState::SettingsStory);//TODO [変更]
+                    }
+                    InPauseButtonAction::Load => {
+                        menu_state.set(MenuState::SettingsStory);
+                    }
+                }
+            },
             Interaction::Hovered => *background_color = HOVERED_BUTTON.into(),
             Interaction::None => *background_color = UI_BACKGROUND_COLOR.into(),
+        }
+    }
+}
+
+fn in_pause_in_save_button_system(
+    menu_interaction_query: Query<
+        (&Interaction, &MenuButtonAction),
+        (Changed<Interaction>, With<Button>),
+    >,
+    mut menu_state: ResMut<NextState<MenuState>>,
+){
+    for (interaction, menu_button_action) in &menu_interaction_query {
+        match *interaction {
+            Interaction::Pressed =>{
+                match *menu_button_action {
+                    MenuButtonAction::BackToMainMenu => {
+                        menu_state.set(MenuState::Disabled)
+                    }
+                    MenuButtonAction::RestartPlay => {
+                        menu_state.set(MenuState::Disabled)//TODO [変更]
+                    }
+                    _ => {}
+                }
+            }
+            Interaction::Hovered => {},
+            Interaction::None => {},
         }
     }
 }
@@ -153,7 +234,7 @@ fn flip_to_pause_node(
                 height: Val::Percent(100.0),
                 display: Display::Grid,
                 // grid_template_columns: vec![GridTrack::min_content(), GridTrack::auto()],
-                grid_template_rows: vec![GridTrack::min_content(), GridTrack::auto()],
+                grid_template_rows: vec![GridTrack::min_content(), GridTrack::min_content(), GridTrack::auto()],
                 ..default()
             },
             BackgroundColor(Color::srgba(0.1, 0.1, 0.1, 0.95)),
@@ -166,6 +247,7 @@ fn flip_to_pause_node(
                     height: Val::Px(30.0),
                     padding: UiRect::all(Val::Px(10.0)),
                     border: UiRect::new(Val::Px(3.0), Val::Px(3.0), Val::Px(3.0), Val::Px(3.0)),
+                    display: Display::Grid,
                     ..default()
                 },
                 BorderColor(UI_BORDER_COLOR),
@@ -173,12 +255,9 @@ fn flip_to_pause_node(
                 Button,
                 PauseButtonMarker,
             ));
-            parent
-                .spawn(Node {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
+            parent.spawn(Node {
                     display: Display::Flex,
-                    justify_content: JustifyContent::Center,
+                    justify_content: JustifyContent::FlexStart,
                     align_items: AlignItems::Center,
                     ..default()
                 })
@@ -199,6 +278,7 @@ fn flip_to_pause_node(
                         BorderColor(UI_BORDER_COLOR),
                         BackgroundColor(UI_BACKGROUND_COLOR),
                         Button,
+                        InPauseButtonAction::Save,
                         PauseButtonNotPauseMarker,
                     ));
                     parent.spawn((//loadボタン //TODO 1.[loadボタン]
@@ -217,9 +297,15 @@ fn flip_to_pause_node(
                         BorderColor(UI_BORDER_COLOR),
                         BackgroundColor(UI_BACKGROUND_COLOR),
                         Button,
+                        InPauseButtonAction::Load,
                         PauseButtonNotPauseMarker,
                     ));
                 });
+            parent.spawn(Node{
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                ..default()
+            });
         })
         .id();
 

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::{
     despawn_screen,
     game_states::in_game::{
-        draw::draw_img, pause::PuaseButtonState, DrawUIState, InGameState, NovelGameStates,
+        draw::draw_img, pause::{PuaseButtonState, FlipVisibilityMarker}, DrawUIState, InGameState, NovelGameStates,
         SceneType, StoryDataList,
     },
     TEXT_COLOR,
@@ -78,7 +78,7 @@ pub fn setup_select_ui(
                 justify_content: JustifyContent::FlexEnd,
                 ..default()
             },
-            OnSelectUI,
+            OnSelectUI,FlipVisibilityMarker
         ))
         .with_children(|parent| {
             parent

@@ -4,7 +4,7 @@ use crate::{
     despawn_screen,
     game_states::in_game::{
         draw::draw_img,
-        pause::{PauseButtonMarker, PuaseButtonState},
+        pause::{PauseButtonMarker, PuaseButtonState, FlipVisibilityMarker},
         DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList,
     },
     TEXT_COLOR,
@@ -63,7 +63,7 @@ pub fn setup_text_ui(
                 justify_content: JustifyContent::Center,
                 ..default()
             },
-            OnTextUI,
+            OnTextUI,FlipVisibilityMarker
         ))
         .with_children(|parent| {
             parent
