@@ -78,7 +78,6 @@ pub fn story_settings_menu_setup(
                             parent.spawn((Text::new("Volume"), button_text_style.clone()));
 
                             if save_data.0.length() > 0 {
-                                //TODO 1.["SelectedStory"の値が変更されたら、該当のセーブデータの内容によって"NovelGameStates"の値が変更されるようにする]
                                 for save_data_iter in 1..(*save_data.0.last().unwrap() + 1) {
                                     //TODO 2.[スクロールに変更する]
                                     let mut entity = parent.spawn((
@@ -90,6 +89,7 @@ pub fn story_settings_menu_setup(
                                         },
                                         BackgroundColor(NORMAL_BUTTON),
                                         SelectedStory(save_data_iter),
+                                        MenuButtonAction::LoadData(save_data_iter),
                                     ));
                                     entity.insert((
                                         Text::new(format!("{}", save_data_iter)),

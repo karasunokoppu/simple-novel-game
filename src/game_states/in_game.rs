@@ -5,7 +5,7 @@ pub mod pause;
 
 use bevy::prelude::*;
 use pause::PuaseButtonState;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::{
@@ -14,7 +14,7 @@ use crate::{
 };
 
 pub fn game_plugin(app: &mut App) {
-    app.init_state::<InGameState>() //TODO 1.[メインメニューからコンティニューボタンを押して入ったときのInGameStateの初期化方法を変える必要がある]
+    app.init_state::<InGameState>()
         .init_state::<DrawUIState>()
         .init_state::<PuaseButtonState>()
         .init_resource::<StoryDataList>()
@@ -56,7 +56,7 @@ pub enum InGameState {
 }
 
 //ゲーム内の状態管理
-#[derive(Resource)]
+#[derive(Resource, Serialize, Deserialize, Debug)]
 pub struct NovelGameStates {
     story: String,
     current_story_id: i32,

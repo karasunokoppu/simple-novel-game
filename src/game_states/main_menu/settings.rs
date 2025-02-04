@@ -20,6 +20,7 @@ pub struct OnSettingsMenuScreen;
 pub enum MenuButtonAction {
     NewPlay,
     RestartPlay,
+    LoadData(u32),
     Settings,
     SettingsStory,
     SettingsDisplay,

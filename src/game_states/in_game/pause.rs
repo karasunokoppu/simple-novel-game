@@ -1,9 +1,11 @@
 pub mod pause01;
 pub mod pause02;
+pub mod save_data;
 
 use bevy::prelude::*;
 
-use crate::despawn_screen;
+use crate::{despawn_screen, SelectedStory};
+use crate::game_states::main_menu::setting_button;
 
 pub fn pause_scene_plugin(app: &mut App) {
     app.init_state::<PauseState>()
@@ -22,13 +24,13 @@ pub fn pause_scene_plugin(app: &mut App) {
             (
                 pause01::pause_button_system,
                 pause02::in_pause_button_system,
-                pause02::in_pause_in_save_button_system,
+                pause02::in_pause_in_load_button_system,
             )
                 .run_if(in_state(PauseState::Pause)),
         )
+        .add_systems(Update, setting_button::<SelectedStory>)
         .add_systems(OnExit(PauseState::Pause), despawn_screen::<OnPause>);
 }
-//TODO 1.[pause時にセーブしたらsavesディレクトリに[数字].ronファイルを生成するようにする]
 
 // Tag component used to tag entities added on the new_game_loading scene
 #[derive(Component)]

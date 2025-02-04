@@ -4,6 +4,7 @@ use bevy::{app::AppExit, color::palettes::css::CRIMSON, prelude::*};
 
 use crate::{
     despawn_screen,
+    game_states::in_game::pause::save_data::load_data,
     game_states::main_menu::settings::{
         setting_display::{display_settings_menu_setup, OnDisplaySettingsMenuScreen},
         setting_sound::{sound_settings_menu_setup, OnSoundSettingsMenuScreen},
@@ -14,6 +15,8 @@ use crate::{
     },
     DisplayQuality, GameState, SelectedStory, Volume, TEXT_COLOR,
 };
+
+use super::in_game::NovelGameStates;
 
 //TODO 3.[デザイン変更]
 // This plugin manages the menu, with 5 different screens:
@@ -27,6 +30,7 @@ pub fn menu_plugin(app: &mut App) {
         // Current screen in the menu is handled by an independent state from `GameState`
         .init_state::<MenuState>()
         .init_resource::<SaveDatas>()
+        .add_event::<LoadDataEvent>()
         .add_systems(OnEnter(GameState::MainMenu), menu_setup)
         // Systems to handle the main menu screen
         .add_systems(OnEnter(MenuState::Main), main_menu_setup)
@@ -76,7 +80,14 @@ pub fn menu_plugin(app: &mut App) {
         // Common systems to all screens that handles buttons behavior
         .add_systems(
             Update,
-            (menu_action, button_system).run_if(in_state(GameState::MainMenu)),
+            (
+                menu_action,
+                button_system,
+                load_data,
+            ).run_if(in_state(GameState::MainMenu)),
+        )
+        .add_systems(Update,
+        load_data.run_if(in_state(GameState::InGame))
         );
 }
 
@@ -90,6 +101,11 @@ pub enum MenuState {
     SettingsSound,
     #[default]
     Disabled,
+}
+
+#[derive(Event)]
+pub struct LoadDataEvent{
+    pub message: u32,
 }
 
 // Tag component used to tag entities added on the main menu screen
@@ -122,7 +138,7 @@ pub fn button_system(
 //選ばれている設定の色を変える
 // This system updates the settings when a new value for a setting is selected, and marks
 // the button as the one currently selected
-fn setting_button<T: Resource + Component + PartialEq + Copy>(
+pub fn setting_button<T: Resource + Component + PartialEq + Copy>(
     interaction_query: Query<(&Interaction, &T, Entity), (Changed<Interaction>, With<Button>)>,
     mut selected_query: Query<(Entity, &mut BackgroundColor), With<SelectedOption>>,
     mut commands: Commands,
@@ -288,7 +304,9 @@ fn menu_action(
     mut app_exit_events: EventWriter<AppExit>,
     mut menu_state: ResMut<NextState<MenuState>>,
     mut game_state: ResMut<NextState<GameState>>,
+    mut load_event_writer: EventWriter<LoadDataEvent>,
 ) {
+
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match menu_button_action {
@@ -302,6 +320,11 @@ fn menu_action(
                 MenuButtonAction::RestartPlay => {
                     game_state.set(GameState::InGame);
                     menu_state.set(MenuState::Disabled);
+                }
+                MenuButtonAction::LoadData(data_index) => {
+                    load_event_writer.send(LoadDataEvent{
+                        message: *data_index,
+                    });
                 }
                 MenuButtonAction::SettingsStory => {
                     menu_state.set(MenuState::SettingsStory);

@@ -1,11 +1,8 @@
 use bevy::prelude::*;
 
-use crate::{
-    game_states::in_game::pause::{
-        InPauseButtonAction, PauseButtonMarker, PauseButtonNotPauseMarker, PauseButtonPauseMarker,
-    },
-    game_states::main_menu::{settings::MenuButtonAction, MenuState},
-};
+use crate::game_states::{in_game::{pause::{
+        save_data::save_data, InPauseButtonAction, PauseButtonMarker, PauseButtonNotPauseMarker, PauseButtonPauseMarker
+    }, NovelGameStates}, main_menu::{settings::MenuButtonAction, MenuState, settings::SelectedOption}};
 
 // //! save画面のボタン処理をメインメニューから入ったときと変更しています
 
@@ -15,7 +12,9 @@ const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
 const PRESSED_BUTTON: Color = Color::srgb(0.5, 0.5, 0.5);
 const UI_BORDER_COLOR: Color = Color::srgb(0.8, 0.8, 0.8);
 const UI_BACKGROUND_COLOR: Color = Color::Srgba(Srgba::new(0.2, 0.2, 0.2, 0.8));
-
+const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
+const HOVERED_PRESSED_BUTTON: Color = Color::srgb(0.25, 0.65, 0.25);
+const SELECTED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
 //PauseButtonStateがPressedのときに、表示されるウィンドウ
 pub fn flip_to_pause_node(
     mut commands: Commands,
@@ -64,7 +63,7 @@ pub fn flip_to_pause_node(
                 })
                 .with_children(|parent| {
                     parent.spawn((
-                        //saveボタン //TODO 1.[saveボタン]
+                        //saveボタン
                         Node {
                             width: Val::Px(120.0),
                             height: Val::Px(60.0),
@@ -82,9 +81,19 @@ pub fn flip_to_pause_node(
                         Button,
                         InPauseButtonAction::Save,
                         PauseButtonNotPauseMarker,
-                    ));
+                    )).with_children(|parent|{
+                        parent.spawn((
+                            Text::new("save"),
+                            TextFont {
+                                font_size: 30.0,
+                                ..default()
+                            },
+                            TextColor(TEXT_COLOR),
+                            PauseButtonNotPauseMarker
+                        ));
+                    });
                     parent.spawn((
-                        //loadボタン //TODO 1.[loadボタン]
+                        //loadボタン
                         Node {
                             width: Val::Px(120.0),
                             height: Val::Px(60.0),
@@ -102,7 +111,17 @@ pub fn flip_to_pause_node(
                         Button,
                         InPauseButtonAction::Load,
                         PauseButtonNotPauseMarker,
-                    ));
+                    )).with_children(|parent|{
+                        parent.spawn((
+                            Text::new("Load"),
+                            TextFont {
+                                font_size: 30.0,
+                                ..default()
+                            },
+                            TextColor(TEXT_COLOR),
+                            PauseButtonNotPauseMarker
+                        ));
+                    });
                 });
             parent.spawn(Node {
                 width: Val::Percent(100.0),
@@ -132,6 +151,7 @@ pub fn in_pause_button_system(
         ),
     >,
     mut menu_state: ResMut<NextState<MenuState>>,
+    novel_game_states: Res<NovelGameStates>
 ) {
     for (interaction, mut background_color, in_pause_button_acrion) in &mut interaction_query {
         match *interaction {
@@ -140,7 +160,8 @@ pub fn in_pause_button_system(
 
                 match in_pause_button_acrion {
                     InPauseButtonAction::Save => {
-                        menu_state.set(MenuState::SettingsStory); //TODO [変更]
+                        save_data(&novel_game_states);
+                        println!("saved!");
                     }
                     InPauseButtonAction::Load => {
                         menu_state.set(MenuState::SettingsStory);
@@ -153,27 +174,32 @@ pub fn in_pause_button_system(
     }
 }
 
-pub fn in_pause_in_save_button_system(
+pub fn in_pause_in_load_button_system(
     mut menu_interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &MenuButtonAction),
+        (&Interaction, &mut BackgroundColor, &MenuButtonAction, Option<&SelectedOption>),
         (Changed<Interaction>, With<Button>),
     >,
     mut menu_state: ResMut<NextState<MenuState>>,
 ) {
-    for (interaction, mut background_color, menu_button_action) in &mut menu_interaction_query {
+    for (interaction, mut background_color, menu_button_action, selected) in &mut menu_interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                *background_color = PRESSED_BUTTON.into();
                 match *menu_button_action {
                     MenuButtonAction::BackToMainMenu => menu_state.set(MenuState::Disabled),
                     MenuButtonAction::RestartPlay => {
-                        menu_state.set(MenuState::Disabled) //TODO [変更]
+                        menu_state.set(MenuState::Disabled) //TODO 1.[ロードしたデータに合わせてゲーム画面のUI・画像を更新する]
                     }
                     _ => {}
                 }
             }
-            Interaction::Hovered => *background_color = HOVERED_BUTTON.with_alpha(1.0).into(),
-            Interaction::None => *background_color = UI_BACKGROUND_COLOR.with_alpha(1.0).into(),
+            Interaction::Hovered => {},
+            Interaction::None => {},
+        }
+        *background_color = match (*interaction, selected) {
+            (Interaction::Pressed, _) | (Interaction::None, Some(_)) => SELECTED_BUTTON.into(),
+            (Interaction::Hovered, Some(_)) => HOVERED_PRESSED_BUTTON.into(),
+            (Interaction::Hovered, None) => HOVERED_BUTTON.into(),
+            (Interaction::None, None) => UI_BACKGROUND_COLOR.with_alpha(1.0).into(),
         }
     }
 }
