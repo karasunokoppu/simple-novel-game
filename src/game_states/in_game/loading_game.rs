@@ -36,8 +36,13 @@ pub fn loading_game_plugin(app: &mut App) {
 // Tag component used to tag entities added on the start_game_loading scene
 #[derive(Component)]
 struct OnContinueGameLoading;
-fn game_state_to_ingame(mut game_state: ResMut<NextState<GameState>>) {
-    game_state.set(GameState::InGame);
+fn game_state_to_ingame(
+    mut game_state: ResMut<NextState<GameState>>,
+    current_game_state: Res<State<GameState>>
+) {
+    if *current_game_state.get() != GameState::InGame {
+        game_state.set(GameState::InGame);
+    }
 }
 
 fn reset_datas(mut commands: Commands) {

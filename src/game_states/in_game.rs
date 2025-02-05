@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::{
-    game_states::in_game::{self, pause::PauseState},
+    game_states::in_game::{self, pause::PauseState, pause::save_data::load_data},
     GameState,
 };
 
@@ -29,6 +29,7 @@ pub fn game_plugin(app: &mut App) {
             in_game::pause::pause_scene_plugin,
             in_game::loading_game::loading_game_plugin,
         ))
+        .add_systems(Update, load_data)
         //Pause state
         .add_systems(OnEnter(InGameState::Draw), pause_state_to_pause)
         .add_systems(OnExit(InGameState::Draw), pause_state_to_disabled)

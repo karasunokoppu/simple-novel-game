@@ -28,7 +28,9 @@ pub fn pause_scene_plugin(app: &mut App) {
             )
                 .run_if(in_state(PauseState::Pause)),
         )
-        .add_systems(Update, setting_button::<SelectedStory>)
+        .add_systems(Update, (
+            setting_button::<SelectedStory>,
+        ))
         .add_systems(OnExit(PauseState::Pause), despawn_screen::<OnPause>);
 }
 

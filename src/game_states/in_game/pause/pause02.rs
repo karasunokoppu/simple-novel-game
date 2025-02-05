@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use crate::game_states::{in_game::{pause::{
-        save_data::save_data, InPauseButtonAction, PauseButtonMarker, PauseButtonNotPauseMarker, PauseButtonPauseMarker
-    }, NovelGameStates}, main_menu::{settings::MenuButtonAction, MenuState, settings::SelectedOption}};
+use crate::{game_states::{self, in_game::{pause::{
+        save_data::save_data, InPauseButtonAction, PauseButtonMarker, PauseButtonNotPauseMarker, PauseButtonPauseMarker, PuaseButtonState,
+    }, InGameState, NovelGameStates, DrawUIState}, main_menu::{LoadDataEvent, settings::{MenuButtonAction, SelectedOption}, MenuState}}, GameState};
 
 // //! save画面のボタン処理をメインメニューから入ったときと変更しています
 
@@ -180,6 +180,11 @@ pub fn in_pause_in_load_button_system(
         (Changed<Interaction>, With<Button>),
     >,
     mut menu_state: ResMut<NextState<MenuState>>,
+    mut in_game_state: ResMut<NextState<InGameState>>,
+    mut pause_button_state: ResMut<NextState<PuaseButtonState>>,
+    mut game_state: ResMut<NextState<GameState>>,
+    mut next_draw_ui_state: ResMut<NextState<DrawUIState>>,
+    mut load_event_writer: EventWriter<LoadDataEvent>,
 ) {
     for (interaction, mut background_color, menu_button_action, selected) in &mut menu_interaction_query {
         match *interaction {
@@ -187,7 +192,16 @@ pub fn in_pause_in_load_button_system(
                 match *menu_button_action {
                     MenuButtonAction::BackToMainMenu => menu_state.set(MenuState::Disabled),
                     MenuButtonAction::RestartPlay => {
-                        menu_state.set(MenuState::Disabled) //TODO 1.[ロードしたデータに合わせてゲーム画面のUI・画像を更新する]
+                        pause_button_state.set(PuaseButtonState::NotPressed);
+                        game_state.set(GameState::InGame);
+                        next_draw_ui_state.set(DrawUIState::Disabled);
+                        in_game_state.set(InGameState::LoadingGame);
+                        menu_state.set(MenuState::Disabled)
+                    },
+                    MenuButtonAction::LoadData(data_index) => {
+                        load_event_writer.send(LoadDataEvent{
+                            message: data_index,
+                        });
                     }
                     _ => {}
                 }

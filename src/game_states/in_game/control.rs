@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use colored::Colorize;
 
 use crate::{
     despawn_screen,

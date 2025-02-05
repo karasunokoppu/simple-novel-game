@@ -38,7 +38,7 @@ pub fn load_data(
     }
 }
 
-fn count_ron_files_in_save_dir() -> std::io::Result<usize> {
+pub fn count_ron_files_in_save_dir() -> std::io::Result<usize> {
     let save_dir = Path::new("saves");
 
     if !save_dir.exists() || !save_dir.is_dir() {

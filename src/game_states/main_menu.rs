@@ -16,8 +16,6 @@ use crate::{
     DisplayQuality, GameState, SelectedStory, Volume, TEXT_COLOR,
 };
 
-use super::in_game::NovelGameStates;
-
 //TODO 3.[デザイン変更]
 // This plugin manages the menu, with 5 different screens:
 // - a main menu with "New Game", "Settings", "Quit"
