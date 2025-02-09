@@ -1,15 +1,19 @@
 use bevy::prelude::*;
-use std::{fs::{self, File},path::Path, io::{Read, Write}};
+use std::{
+    fs::{self, File},
+    io::{Read, Write},
+    path::Path,
+};
 
 use crate::game_states::in_game::NovelGameStates;
 use crate::game_states::main_menu::LoadDataEvent;
 
-pub fn save_data(
-    data: &NovelGameStates,
-){
+pub fn save_data(data: &NovelGameStates) {
     let file_count: u32 = match count_ron_files_in_save_dir() {
-        Ok(count) => {println!("count is {}", count);count as u32},
-        Err(e) => panic!("{e}")
+        Ok(count) => {
+            count as u32
+        }
+        Err(e) => panic!("{e}"),
     };
     let file_name: u32 = file_count + 1;
     let file_path = format!("saves/{}.ron", file_name);
@@ -17,20 +21,20 @@ pub fn save_data(
     let mut file = File::create(file_path).unwrap();
 
     file.write_all(save_strings.as_bytes()).unwrap();
-
 }
 
 pub fn load_data(
     mut data: ResMut<NovelGameStates>,
     mut save_data_iter: EventReader<LoadDataEvent>,
-){
-    for load_data_index in save_data_iter.read(){
+) {
+    for load_data_index in save_data_iter.read() {
         let file_path = format!("saves/{}.ron", load_data_index.message);
         let mut file = File::open(file_path).unwrap();
         let mut buffer = String::new();
 
         file.read_to_string(&mut buffer).unwrap();
-        let load_data: NovelGameStates = ron::from_str(&buffer).expect("Failed to deserialize data");
+        let load_data: NovelGameStates =
+            ron::from_str(&buffer).expect("Failed to deserialize data");
 
         data.current_story_id = load_data.current_story_id;
         data.next_story_id = load_data.next_story_id;

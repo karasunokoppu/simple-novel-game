@@ -3,10 +3,10 @@ use std::fs::File;
 
 use crate::{
     despawn_screen,
-    game_states::in_game::{
+    game_states::{in_game::{
         DisplayImage, ImageData, InGameState, NovelGameStates, StoryDataList, StoryImageList,
         StorySceneData, WallPaperData, WallpaperAssets, Wallpapers,
-    },
+    }, main_menu::MenuState},
     GameState,
 };
 
@@ -38,11 +38,13 @@ pub fn loading_game_plugin(app: &mut App) {
 struct OnContinueGameLoading;
 fn game_state_to_ingame(
     mut game_state: ResMut<NextState<GameState>>,
-    current_game_state: Res<State<GameState>>
+    current_game_state: Res<State<GameState>>,
+    mut menu_state: ResMut<NextState<MenuState>>,
 ) {
     if *current_game_state.get() != GameState::InGame {
         game_state.set(GameState::InGame);
     }
+    menu_state.set(MenuState::Disabled);
 }
 
 fn reset_datas(mut commands: Commands) {

@@ -1,8 +1,13 @@
 mod game_states;
 
-use crate::game_states::in_game::{pause::PauseState, DrawUIState, InGameState};
+use std::any::type_name;
+
+use crate::game_states::in_game::{
+    pause::{PauseButtonState, PauseState},
+    DrawUIState, InGameState,
+};
 use bevy::prelude::*;
-use colored::Colorize;
+use game_states::main_menu::{settings::setting_story::SaveDatas, MenuState, LoadDataEvent};
 
 const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
@@ -40,20 +45,29 @@ fn main() {
             }),
             ..default()
         }))
+        .init_resource::<SaveDatas>()
         // Insert as resource the initial value for the settings resources
         .insert_resource(DisplayQuality::Medium)
         .insert_resource(Volume(7))
         .insert_resource(SelectedStory(1))
+
+        .add_event::<LoadDataEvent>()
         // Declare the game state, whose starting value is determined by the `Default` trait
         .init_state::<GameState>()
         .add_systems(Startup, setup_camera)
         .add_systems(
             Update,
             (
-                in_game_state_change_detect,
-                game_state_change_detect,
-                draw_ui_state_change_detect,
-                pause_state_change_detect,
+                // in_game_state_change_detect,
+                // game_state_change_detect,
+                // draw_ui_state_change_detect,
+                // pause_state_change_detect,
+                state_change_detect::<InGameState>,
+                state_change_detect::<GameState>,
+                state_change_detect::<DrawUIState>,
+                state_change_detect::<PauseState>,
+                state_change_detect::<PauseButtonState>,
+                state_change_detect::<MenuState>,
             ),
         )
         // Adds the plugins for each state
@@ -76,71 +90,19 @@ fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands
     }
 }
 
-fn in_game_state_change_detect(
-    in_game_states: Res<State<InGameState>>,
-    mut last_state: Local<Option<InGameState>>,
-) {
-    if Some(in_game_states.get().clone()) != *last_state {
-        *last_state = Some(in_game_states.get().clone());
-        let current_state = format!("{:?}", last_state.unwrap());
-        println!(
-            "{} {} {} {}",
-            ">",
-            "InGameState".blue(),
-            "changed to",
-            current_state.blue(),
-        );
-    }
-}
-
-fn game_state_change_detect(
-    game_states: Res<State<GameState>>,
-    mut last_state: Local<Option<GameState>>,
+fn state_change_detect<T: States + Copy>(
+    game_states: Res<State<T>>,
+    mut last_state: Local<Option<T>>,
 ) {
     if Some(game_states.get().clone()) != *last_state {
         *last_state = Some(game_states.get().clone());
         let current_state = format!("{:?}", last_state.unwrap());
-        println!(
-            "{} {} {} {}",
-            ">",
-            "GameState".red(),
-            "changed to",
-            current_state.red(),
-        );
-    }
-}
 
-fn draw_ui_state_change_detect(
-    game_states: Res<State<DrawUIState>>,
-    mut last_state: Local<Option<DrawUIState>>,
-) {
-    if Some(game_states.get().clone()) != *last_state {
-        *last_state = Some(game_states.get().clone());
-        let current_state = format!("{:?}", last_state.unwrap());
-        println!(
-            "{} {} {} {}",
-            ">",
-            "DrawUIState".green(),
-            "changed to",
-            current_state.green(),
-        );
-    }
-}
-
-fn pause_state_change_detect(
-    game_states: Res<State<PauseState>>,
-    mut last_state: Local<Option<PauseState>>,
-) {
-    if Some(game_states.get().clone()) != *last_state {
-        *last_state = Some(game_states.get().clone());
-        let current_state = format!("{:?}", last_state.unwrap());
-        println!(
-            "{} {} {} {}",
-            ">",
-            "PauseState".bright_yellow(),
-            "changed to",
-            current_state.bright_yellow(),
-        );
+        let mut t_type = type_name::<T>();
+        if let Some(pos) = t_type.rfind("::") {
+            t_type = &t_type[pos + 2..];
+        }
+        println!("{} {} {} {}", ">", t_type, "changed to", current_state,);
     }
 }
 //TODO 2.[各ボタンを押したときに、ターミナルにログが出るようにする]

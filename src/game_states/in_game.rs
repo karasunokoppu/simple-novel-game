@@ -4,19 +4,19 @@ pub mod loading_game;
 pub mod pause;
 
 use bevy::prelude::*;
-use pause::PuaseButtonState;
+use pause::PauseButtonState;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::{
-    game_states::in_game::{self, pause::PauseState, pause::save_data::load_data},
-    GameState,
+    game_states::in_game::{self, pause::{OnPause, PauseState}},
+    GameState,despawn_screen
 };
 
 pub fn game_plugin(app: &mut App) {
     app.init_state::<InGameState>()
         .init_state::<DrawUIState>()
-        .init_state::<PuaseButtonState>()
+        .init_state::<PauseButtonState>()
         .init_resource::<StoryDataList>()
         .init_resource::<StoryImageList>()
         .init_resource::<StoryWallPaperList>()
@@ -29,11 +29,12 @@ pub fn game_plugin(app: &mut App) {
             in_game::pause::pause_scene_plugin,
             in_game::loading_game::loading_game_plugin,
         ))
-        .add_systems(Update, load_data)
+        //.add_systems(Update, load_data)
         //Pause state
         .add_systems(OnEnter(InGameState::Draw), pause_state_to_pause)
         .add_systems(OnExit(InGameState::Draw), pause_state_to_disabled)
-        .add_systems(OnEnter(GameState::InGame), state_to_new_game_loading);
+        .add_systems(OnEnter(GameState::InGame), state_to_new_game_loading)
+        .add_systems(OnExit(PauseState::Pause), despawn_screen::<OnPause>);
 }
 
 fn state_to_new_game_loading(mut in_game_state: ResMut<NextState<InGameState>>) {
@@ -65,6 +66,7 @@ pub struct NovelGameStates {
 }
 impl Default for NovelGameStates {
     fn default() -> NovelGameStates {
+        println!("NovelGameState is inisialized");
         NovelGameStates {
             story: "story01".to_string(),
             current_story_id: 1,

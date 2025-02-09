@@ -4,7 +4,7 @@ use crate::{
     despawn_screen,
     game_states::in_game::{
         draw::draw_img,
-        pause::{FlipVisibilityMarker, PauseButtonMarker, PuaseButtonState},
+        pause::{FlipVisibilityMarker, PauseButtonMarker, PauseButtonState},
         DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList,
     },
     TEXT_COLOR,
@@ -156,10 +156,10 @@ fn button_system(
     mut novel_game_states: ResMut<NovelGameStates>,
     mut in_game_state: ResMut<NextState<InGameState>>,
     mut draw_ui_state: ResMut<NextState<DrawUIState>>,
-    pause_button_state: Res<State<PuaseButtonState>>,
+    pause_button_state: Res<State<PauseButtonState>>,
 ) {
     match *pause_button_state.get() {
-        PuaseButtonState::NotPressed => {
+        PauseButtonState::NotPressed => {
             for (interaction, mut background_color) in &mut interaction_query {
                 match *interaction {
                     Interaction::Pressed => {
@@ -190,6 +190,6 @@ fn button_system(
                 }
             }
         }
-        PuaseButtonState::Pressed => {}
+        PauseButtonState::Pressed => {}
     }
 }

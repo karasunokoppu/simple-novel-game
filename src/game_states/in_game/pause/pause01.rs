@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game_states::in_game::pause::{
     FlipVisibilityMarker, OnPause, PauseButtonMarker, PauseButtonNotPauseMarker,
-    PauseButtonPauseMarker, PuaseButtonState,
+    PauseButtonPauseMarker, PauseButtonState,
 };
 
 //Pauseボタンを押す前と押したときの処理
@@ -62,7 +62,7 @@ pub fn flip_to_not_pause_node(
             },
             BorderColor(UI_BORDER_COLOR),
             BackgroundColor(UI_BACKGROUND_COLOR),
-            Button,
+            Button,OnPause,
             PauseButtonMarker,
         ))
         .id();
@@ -88,19 +88,19 @@ pub fn pause_button_system(
             (With<Button>, With<PauseButtonMarker>),
         ),
     >,
-    pause_button_state: Res<State<PuaseButtonState>>,
-    mut next_pause_button_state: ResMut<NextState<PuaseButtonState>>,
+    pause_button_state: Res<State<PauseButtonState>>,
+    mut next_pause_button_state: ResMut<NextState<PauseButtonState>>,
 ) {
     for (interaction, mut background_color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 *background_color = PRESSED_BUTTON.into();
                 match *pause_button_state.get() {
-                    PuaseButtonState::Pressed => {
-                        next_pause_button_state.set(PuaseButtonState::NotPressed)
+                    PauseButtonState::Pressed => {
+                        next_pause_button_state.set(PauseButtonState::NotPressed)
                     }
-                    PuaseButtonState::NotPressed => {
-                        next_pause_button_state.set(PuaseButtonState::Pressed)
+                    PauseButtonState::NotPressed => {
+                        next_pause_button_state.set(PauseButtonState::Pressed)
                     }
                 }
             }
@@ -114,12 +114,13 @@ pub fn pause_button_system(
     }
 }
 
-pub fn flip_ui_to_visible(mut test_ui: Query<(&mut Node, &FlipVisibilityMarker)>) {
+pub fn flip_ui_to_visible(mut test_ui: Query<(&mut Node, &FlipVisibilityMarker), With<FlipVisibilityMarker>>) {
     for (mut node, _) in test_ui.iter_mut() {
         node.display = Display::Flex;
     }
 }
-pub fn flip_ui_to_not_visible(mut test_ui: Query<(&mut Node, &FlipVisibilityMarker)>) {
+pub fn flip_ui_to_not_visible(mut test_ui: Query<(&mut Node, &FlipVisibilityMarker), With<FlipVisibilityMarker>>) {
+    println!("{}", test_ui.iter().count());
     for (mut node, _) in test_ui.iter_mut() {
         node.display = Display::None;
     }

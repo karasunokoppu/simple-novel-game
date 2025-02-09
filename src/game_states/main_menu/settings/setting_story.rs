@@ -38,8 +38,17 @@ pub fn story_settings_menu_setup(
         TextColor(TEXT_COLOR),
     );
 
-    commands
-        .spawn((
+    commands.spawn((
+        Node{
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            display: Display::Flex,
+            ..default()
+        },
+        Transform::from_xyz(0.0, 0.0, 1100.0),
+        OnStorySettingsMenuScreen,
+    )).with_children(|parent|{
+        parent.spawn((
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
@@ -47,7 +56,6 @@ pub fn story_settings_menu_setup(
                 justify_content: JustifyContent::Center,
                 ..default()
             },
-            OnStorySettingsMenuScreen,
         ))
         .with_children(|parent| {
             parent
@@ -100,7 +108,6 @@ pub fn story_settings_menu_setup(
                                     }
                                 }
                             }
-                            println!("{}", save_data.0.length());
                         });
                     parent
                         .spawn(Node {
@@ -128,6 +135,8 @@ pub fn story_settings_menu_setup(
                         });
                 });
         });
+    });
+        println!("test");
 }
 
 //saves内の処理
@@ -152,5 +161,4 @@ pub fn get_save_files_names(mut save_datas: ResMut<SaveDatas>) {
     file_names.sort_by_key(|s| *s);
 
     save_datas.0 = file_names;
-    println!("{:?}", save_datas.0);
 }

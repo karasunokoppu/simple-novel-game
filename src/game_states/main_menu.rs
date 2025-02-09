@@ -27,8 +27,6 @@ pub fn menu_plugin(app: &mut App) {
         // entering the `GameState::Menu` state.
         // Current screen in the menu is handled by an independent state from `GameState`
         .init_state::<MenuState>()
-        .init_resource::<SaveDatas>()
-        .add_event::<LoadDataEvent>()
         .add_systems(OnEnter(GameState::MainMenu), menu_setup)
         // Systems to handle the main menu screen
         .add_systems(OnEnter(MenuState::Main), main_menu_setup)
@@ -50,7 +48,7 @@ pub fn menu_plugin(app: &mut App) {
         )
         .add_systems(
             OnExit(MenuState::SettingsStory),
-            despawn_screen::<OnStorySettingsMenuScreen>,
+            (despawn_screen::<OnStorySettingsMenuScreen>,||{println!("><><><><><><><><><><><")})
         )
         // Systems to handle the display settings screen
         .add_systems(
@@ -78,15 +76,9 @@ pub fn menu_plugin(app: &mut App) {
         // Common systems to all screens that handles buttons behavior
         .add_systems(
             Update,
-            (
-                menu_action,
-                button_system,
-                load_data,
-            ).run_if(in_state(GameState::MainMenu)),
+            (menu_action, button_system).run_if(in_state(GameState::MainMenu)),
         )
-        .add_systems(Update,
-        load_data.run_if(in_state(GameState::InGame))
-        );
+        .add_systems(Update, load_data);
 }
 
 // State used for the current menu screen
@@ -102,7 +94,7 @@ pub enum MenuState {
 }
 
 #[derive(Event)]
-pub struct LoadDataEvent{
+pub struct LoadDataEvent {
     pub message: u32,
 }
 
@@ -304,7 +296,6 @@ fn menu_action(
     mut game_state: ResMut<NextState<GameState>>,
     mut load_event_writer: EventWriter<LoadDataEvent>,
 ) {
-
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match menu_button_action {
@@ -320,7 +311,8 @@ fn menu_action(
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::LoadData(data_index) => {
-                    load_event_writer.send(LoadDataEvent{
+                    println!("NovelGameState is changed from main_menu");
+                    load_event_writer.send(LoadDataEvent {
                         message: *data_index,
                     });
                 }

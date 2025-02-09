@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     despawn_screen,
-    game_states::in_game::{DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList},
+    game_states::in_game::{DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList, pause::{PauseState, PauseButtonState}},
     GameState,
 };
 
@@ -21,6 +21,8 @@ fn change_drawui_state(
     mut next_draw_ui_state: ResMut<NextState<DrawUIState>>,
     mut in_game_state: ResMut<NextState<InGameState>>,
     mut game_state: ResMut<NextState<GameState>>,
+    mut pause_state: ResMut<NextState<PauseState>>,
+    mut pause_button_state: ResMut<NextState<PauseButtonState>>,
 ) {
     for (_, datas) in data_list.story_data_list.iter() {
         for story_scene_data in datas.iter() {
@@ -41,8 +43,10 @@ fn change_drawui_state(
                     SceneType::Finish(finish) => {
                         if finish.text == "finish" {
                             //終了処理
-                            in_game_state.set(InGameState::Disabled);
+                            pause_state.set(PauseState::Disabled);
+                            pause_button_state.set(PauseButtonState::NotPressed);
                             next_draw_ui_state.set(DrawUIState::Disabled);
+                            in_game_state.set(InGameState::Disabled);
                             game_state.set(GameState::MainMenu);
 
                             novel_game_states.story = "story01".to_string();
