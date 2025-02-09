@@ -9,8 +9,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::{
-    game_states::in_game::{self, pause::{OnPause, PauseState}},
-    GameState,despawn_screen
+    despawn_screen,
+    game_states::in_game::{
+        self,
+        pause::{OnPause, PauseState},
+    },
+    GameState,
 };
 
 pub fn game_plugin(app: &mut App) {

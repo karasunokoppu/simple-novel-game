@@ -62,7 +62,8 @@ pub fn flip_to_not_pause_node(
             },
             BorderColor(UI_BORDER_COLOR),
             BackgroundColor(UI_BACKGROUND_COLOR),
-            Button,OnPause,
+            Button,
+            OnPause,
             PauseButtonMarker,
         ))
         .id();
@@ -114,12 +115,16 @@ pub fn pause_button_system(
     }
 }
 
-pub fn flip_ui_to_visible(mut test_ui: Query<(&mut Node, &FlipVisibilityMarker), With<FlipVisibilityMarker>>) {
+pub fn flip_ui_to_visible(
+    mut test_ui: Query<(&mut Node, &FlipVisibilityMarker), With<FlipVisibilityMarker>>,
+) {
     for (mut node, _) in test_ui.iter_mut() {
         node.display = Display::Flex;
     }
 }
-pub fn flip_ui_to_not_visible(mut test_ui: Query<(&mut Node, &FlipVisibilityMarker), With<FlipVisibilityMarker>>) {
+pub fn flip_ui_to_not_visible(
+    mut test_ui: Query<(&mut Node, &FlipVisibilityMarker), With<FlipVisibilityMarker>>,
+) {
     println!("{}", test_ui.iter().count());
     for (mut node, _) in test_ui.iter_mut() {
         node.display = Display::None;

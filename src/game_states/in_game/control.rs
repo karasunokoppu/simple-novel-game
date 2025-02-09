@@ -2,7 +2,10 @@ use bevy::prelude::*;
 
 use crate::{
     despawn_screen,
-    game_states::in_game::{DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList, pause::{PauseState, PauseButtonState}},
+    game_states::in_game::{
+        pause::{PauseButtonState, PauseState},
+        DrawUIState, InGameState, NovelGameStates, SceneType, StoryDataList,
+    },
     GameState,
 };
 

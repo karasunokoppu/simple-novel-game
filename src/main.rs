@@ -7,7 +7,7 @@ use crate::game_states::in_game::{
     DrawUIState, InGameState,
 };
 use bevy::prelude::*;
-use game_states::main_menu::{settings::setting_story::SaveDatas, MenuState, LoadDataEvent};
+use game_states::main_menu::{settings::setting_story::SaveDatas, LoadDataEvent, MenuState};
 
 const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 
@@ -50,7 +50,6 @@ fn main() {
         .insert_resource(DisplayQuality::Medium)
         .insert_resource(Volume(7))
         .insert_resource(SelectedStory(1))
-
         .add_event::<LoadDataEvent>()
         // Declare the game state, whose starting value is determined by the `Default` trait
         .init_state::<GameState>()

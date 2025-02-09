@@ -10,9 +10,7 @@ use crate::game_states::main_menu::LoadDataEvent;
 
 pub fn save_data(data: &NovelGameStates) {
     let file_count: u32 = match count_ron_files_in_save_dir() {
-        Ok(count) => {
-            count as u32
-        }
+        Ok(count) => count as u32,
         Err(e) => panic!("{e}"),
     };
     let file_name: u32 = file_count + 1;

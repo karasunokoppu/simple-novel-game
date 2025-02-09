@@ -1,6 +1,6 @@
 pub mod settings;
 
-use bevy::{app::AppExit, color::palettes::css::CRIMSON, prelude::*};
+use bevy::{app::AppExit, color::palettes::css::DARK_VIOLET, prelude::*};
 
 use crate::{
     despawn_screen,
@@ -9,14 +9,14 @@ use crate::{
         setting_display::{display_settings_menu_setup, OnDisplaySettingsMenuScreen},
         setting_sound::{sound_settings_menu_setup, OnSoundSettingsMenuScreen},
         setting_story::{
-            get_save_files_names, story_settings_menu_setup, OnStorySettingsMenuScreen, update_scroll_position,
+            get_save_files_names, story_settings_menu_setup, update_scroll_position,
+            OnStorySettingsMenuScreen,
         },
         settings_menu_setup, MenuButtonAction, OnSettingsMenuScreen, SelectedOption,
     },
     DisplayQuality, GameState, SelectedStory, Volume, TEXT_COLOR,
 };
 
-//TODO 3.[デザイン変更]
 // This plugin manages the menu, with 5 different screens:
 // - a main menu with "New Game", "Settings", "Quit"
 // - a settings menu with two submenus and a back button
@@ -44,11 +44,14 @@ pub fn menu_plugin(app: &mut App) {
         )
         .add_systems(
             Update,
-            ((update_scroll_position, setting_button::<SelectedStory>).run_if(in_state(MenuState::SettingsStory)),),
+            ((update_scroll_position, setting_button::<SelectedStory>)
+                .run_if(in_state(MenuState::SettingsStory)),),
         )
         .add_systems(
             OnExit(MenuState::SettingsStory),
-            (despawn_screen::<OnStorySettingsMenuScreen>,||{println!("><><><><><><><><><><><")})
+            (despawn_screen::<OnStorySettingsMenuScreen>, || {
+                println!("><><><><><><><><><><><")
+            }),
         )
         // Systems to handle the display settings screen
         .add_systems(
@@ -185,101 +188,117 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 justify_content: JustifyContent::Center,
                 ..default()
             },
+            BackgroundColor(DARK_VIOLET.into()),
             OnMainMenuScreen,
         ))
         .with_children(|parent| {
             parent
                 .spawn((
                     Node {
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
                         flex_direction: FlexDirection::Column,
-                        align_items: AlignItems::Center,
+                        align_items: AlignItems::FlexEnd,
+                        padding: UiRect::all(Val::Percent(5.0)),
                         ..default()
                     },
-                    BackgroundColor(CRIMSON.into()),
                 ))
                 .with_children(|parent| {
                     // Display the game name
                     parent.spawn((
-                        Text::new("Bevy Game Menu UI"),
-                        TextFont {
-                            font_size: 67.0,
-                            ..default()
-                        },
-                        TextColor(TEXT_COLOR),
                         Node {
-                            margin: UiRect::all(Val::Px(50.0)),
+                            width: Val::Percent(100.0),
+                            justify_content: JustifyContent::Center,
+                            margin: UiRect::bottom(Val::Percent(10.0)),
+                            border: UiRect::all(Val::Px(2.0)),
                             ..default()
                         },
-                    ));
+                        BorderColor(Color::BLACK),
+                        BackgroundColor(Color::srgb(0.25, 0.25, 0.25))
+                    )).with_children(|parent|{
+                        parent.spawn((
+                            Text::new("Bevy Novel Game"),
+                            TextFont {
+                                font_size: 67.0,
+                                ..default()
+                            },
+                            TextColor(TEXT_COLOR),
+                        ));
+                    });
 
                     // Display three buttons for each action available from the main menu:
                     // - new game
                     // - continue game
                     // - settings
                     // - quit
-                    parent
-                        .spawn((
-                            Button,
-                            button_node.clone(),
-                            BackgroundColor(NORMAL_BUTTON),
-                            MenuButtonAction::NewPlay,
-                        ))
-                        .with_children(|parent| {
-                            let icon = asset_server.load("image/icons/UI_Icon/right.png");
-                            parent.spawn((ImageNode::new(icon), button_icon_node.clone()));
-                            parent.spawn((
-                                Text::new("New Game"),
-                                button_text_font.clone(),
-                                TextColor(TEXT_COLOR),
-                            ));
-                        });
-                    parent
-                        .spawn((
-                            Button,
-                            button_node.clone(),
-                            BackgroundColor(NORMAL_BUTTON),
-                            MenuButtonAction::SettingsStory,
-                        ))
-                        .with_children(|parent| {
-                            let icon = asset_server.load("image/icons/UI_Icon/right.png");
-                            parent.spawn((ImageNode::new(icon), button_icon_node.clone()));
-                            parent.spawn((
-                                Text::new("Continue"),
-                                button_text_font.clone(),
-                                TextColor(TEXT_COLOR),
-                            ));
-                        });
-                    parent
-                        .spawn((
-                            Button,
-                            button_node.clone(),
-                            BackgroundColor(NORMAL_BUTTON),
-                            MenuButtonAction::Settings,
-                        ))
-                        .with_children(|parent| {
-                            let icon = asset_server.load("image/icons/UI_Icon/wrench.png");
-                            parent.spawn((ImageNode::new(icon), button_icon_node.clone()));
-                            parent.spawn((
-                                Text::new("Settings"),
-                                button_text_font.clone(),
-                                TextColor(TEXT_COLOR),
-                            ));
-                        });
-                    parent
-                        .spawn((
-                            Button,
-                            button_node,
-                            BackgroundColor(NORMAL_BUTTON),
-                            MenuButtonAction::Quit,
-                        ))
-                        .with_children(|parent| {
-                            let icon = asset_server.load("image/icons/UI_Icon/exitRight.png");
-                            parent.spawn((ImageNode::new(icon), button_icon_node));
-                            parent.spawn((
-                                Text::new("Quit"),
-                                button_text_font,
-                                TextColor(TEXT_COLOR),
-                            ));
+                    parent.spawn(Node{
+                        flex_direction: FlexDirection::Column,
+                        ..default()
+                    }).with_children(|parent|{
+                        parent
+                            .spawn((
+                                Button,
+                                button_node.clone(),
+                                BackgroundColor(NORMAL_BUTTON),
+                                MenuButtonAction::NewPlay,
+                            ))
+                            .with_children(|parent| {
+                                let icon = asset_server.load("image/icons/UI_Icon/right.png");
+                                parent.spawn((ImageNode::new(icon), button_icon_node.clone()));
+                                parent.spawn((
+                                    Text::new("New Game"),
+                                    button_text_font.clone(),
+                                    TextColor(TEXT_COLOR),
+                                ));
+                            });
+                        parent
+                            .spawn((
+                                Button,
+                                button_node.clone(),
+                                BackgroundColor(NORMAL_BUTTON),
+                                MenuButtonAction::SettingsStory,
+                            ))
+                            .with_children(|parent| {
+                                let icon = asset_server.load("image/icons/UI_Icon/right.png");
+                                parent.spawn((ImageNode::new(icon), button_icon_node.clone()));
+                                parent.spawn((
+                                    Text::new("Continue"),
+                                    button_text_font.clone(),
+                                    TextColor(TEXT_COLOR),
+                                ));
+                            });
+                        parent
+                            .spawn((
+                                Button,
+                                button_node.clone(),
+                                BackgroundColor(NORMAL_BUTTON),
+                                MenuButtonAction::Settings,
+                            ))
+                            .with_children(|parent| {
+                                let icon = asset_server.load("image/icons/UI_Icon/wrench.png");
+                                parent.spawn((ImageNode::new(icon), button_icon_node.clone()));
+                                parent.spawn((
+                                    Text::new("Settings"),
+                                    button_text_font.clone(),
+                                    TextColor(TEXT_COLOR),
+                                ));
+                            });
+                        parent
+                            .spawn((
+                                Button,
+                                button_node,
+                                BackgroundColor(NORMAL_BUTTON),
+                                MenuButtonAction::Quit,
+                            ))
+                            .with_children(|parent| {
+                                let icon = asset_server.load("image/icons/UI_Icon/exitRight.png");
+                                parent.spawn((ImageNode::new(icon), button_icon_node));
+                                parent.spawn((
+                                    Text::new("Quit"),
+                                    button_text_font,
+                                    TextColor(TEXT_COLOR),
+                                ));
+                            });
                         });
                 });
         });

@@ -1,18 +1,18 @@
 use bevy::prelude::*;
 
 use crate::game_states::{
-    self, in_game::{
+    in_game::{
         pause::{
             save_data::save_data, InPauseButtonAction, PauseButtonMarker,
             PauseButtonNotPauseMarker, PauseButtonPauseMarker, PauseButtonState,
         },
         DrawUIState, InGameState, NovelGameStates,
-    }, main_menu::{
+    },
+    main_menu::{
         settings::{MenuButtonAction, SelectedOption},
         LoadDataEvent, MenuState,
-    }
+    },
 };
-use crate::GameState;
 
 use super::OnPause;
 // //! save画面のボタン処理をメインメニューから入ったときと変更しています
@@ -47,7 +47,8 @@ pub fn flip_to_pause_node(
                 ..default()
             },
             BackgroundColor(Color::srgba(0.1, 0.1, 0.1, 0.95)),
-            PauseButtonNotPauseMarker,OnPause
+            PauseButtonNotPauseMarker,
+            OnPause,
         ))
         .with_children(|parent| {
             parent.spawn((
@@ -218,7 +219,7 @@ pub fn in_pause_in_load_button_system(
                 MenuButtonAction::BackToMainMenu => {
                     in_game_state.set(InGameState::LoadingGame);
                     menu_state.set(MenuState::Disabled)
-                },
+                }
                 MenuButtonAction::RestartPlay => {
                     pause_button_state.set(PauseButtonState::NotPressed);
                     next_draw_ui_state.set(DrawUIState::Disabled);

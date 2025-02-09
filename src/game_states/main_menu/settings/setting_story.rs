@@ -1,8 +1,12 @@
-use bevy::{
-    a11y::AccessibilityNode, input::mouse::{MouseScrollUnit, MouseWheel}, picking::focus::HoverMap,
-    color::palettes::css::CRIMSON, prelude::*, render::render_resource::encase::private::Length
-};
 use accesskit::{Node as Accessible, Role};
+use bevy::{
+    a11y::AccessibilityNode,
+    color::palettes::css::DARK_VIOLET,
+    input::mouse::{MouseScrollUnit, MouseWheel},
+    picking::focus::HoverMap,
+    prelude::*,
+    render::render_resource::encase::private::Length,
+};
 use std::fs;
 
 use crate::{
@@ -40,117 +44,117 @@ pub fn story_settings_menu_setup(
         TextColor(TEXT_COLOR),
     );
 
-    commands.spawn((
-        Node{
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
-            display: Display::Flex,
-            ..default()
-        },
-        Transform::from_xyz(0.0, 0.0, 1100.0),
-        OnStorySettingsMenuScreen,
-    )).with_children(|parent|{
-        parent.spawn((
+    commands
+        .spawn((
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
-                justify_content: JustifyContent::FlexStart,
+                display: Display::Flex,
                 ..default()
             },
-            BackgroundColor(CRIMSON.into()),
+            Transform::from_xyz(0.0, 0.0, 1100.0),
+            OnStorySettingsMenuScreen,
         ))
         .with_children(|parent| {
             parent
                 .spawn((
                     Node {
-                        width: Val::Percent(20.0),
+                        width: Val::Percent(100.0),
                         height: Val::Percent(100.0),
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        display: Display::Grid,
-                        grid_template_rows: vec![
-                            GridTrack::flex(1.0),
-                            GridTrack::auto()
-                        ],
+                        justify_content: JustifyContent::FlexStart,
                         ..default()
                     },
-                )).with_children(|parent| {
-                    parent.spawn((
-                                Node {
-                                    width: Val::Percent(100.0),
-                                    height: Val::Percent(100.0),
-                                    display: Display::Flex,
-                                    flex_direction: FlexDirection::Column,
-                                    overflow: Overflow::scroll_y(),
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
-                                BackgroundColor(Color::srgb(0.7, 0.7, 0.7)),
-                            ))
-                            .with_children(|parent| {
-                                if save_data.0.length() > 0 {
-                                    for save_data_iter in 1..(*save_data.0.last().unwrap() + 1) {
-                                        //TODO 2.[スクロールに変更する]
-                                        let mut entity = parent.spawn((
-                                            Button,
-                                            Node {
-                                                width: Val::Percent(100.0),
-                                                height: Val::Px(100.0),
-                                                justify_content: JustifyContent::Center,
-                                                align_items: AlignItems::Center,
-                                                ..default()
-                                            },
-                                            BackgroundColor(NORMAL_BUTTON),
-                                            SelectedStory(save_data_iter),
-                                            MenuButtonAction::LoadData(save_data_iter),
-                                            AccessibilityNode(Accessible::new(
-                                                Role::ListItem
-                                            )),Label,
-                                            PickingBehavior {
-                                                should_block_lower: false,
-                                                ..default()
+                    BackgroundColor(DARK_VIOLET.into()),
+                ))
+                .with_children(|parent| {
+                    parent
+                        .spawn((Node {
+                            width: Val::Percent(20.0),
+                            height: Val::Percent(100.0),
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            display: Display::Grid,
+                            grid_template_rows: vec![GridTrack::flex(1.0), GridTrack::auto()],
+                            ..default()
+                        },))
+                        .with_children(|parent| {
+                            parent
+                                .spawn((
+                                    Node {
+                                        width: Val::Percent(100.0),
+                                        height: Val::Percent(100.0),
+                                        display: Display::Flex,
+                                        flex_direction: FlexDirection::Column,
+                                        overflow: Overflow::scroll_y(),
+                                        align_items: AlignItems::Center,
+                                        ..default()
+                                    },
+                                    BackgroundColor(Color::srgb(0.7, 0.7, 0.7)),
+                                ))
+                                .with_children(|parent| {
+                                    if save_data.0.length() > 0 {
+                                        for save_data_iter in 1..(*save_data.0.last().unwrap() + 1)
+                                        {
+                                            let mut entity = parent.spawn((
+                                                Button,
+                                                Node {
+                                                    width: Val::Percent(100.0),
+                                                    height: Val::Px(100.0),
+                                                    justify_content: JustifyContent::Center,
+                                                    align_items: AlignItems::Center,
+                                                    ..default()
+                                                },
+                                                BackgroundColor(NORMAL_BUTTON),
+                                                SelectedStory(save_data_iter),
+                                                MenuButtonAction::LoadData(save_data_iter),
+                                                AccessibilityNode(Accessible::new(Role::ListItem)),
+                                                Label,
+                                                PickingBehavior {
+                                                    should_block_lower: false,
+                                                    ..default()
+                                                },
+                                            ));
+                                            entity.insert((
+                                                Text::new(format!("{}", save_data_iter)),
+                                                button_text_style.clone(),
+                                            ));
+                                            if *save_story == SelectedStory(save_data_iter) {
+                                                entity.insert(SelectedOption);
                                             }
-                                        ));
-                                        entity.insert((
-                                            Text::new(format!("{}", save_data_iter)),
-                                            button_text_style.clone(),
-                                        ));
-                                        if *save_story == SelectedStory(save_data_iter) {
-                                            entity.insert(SelectedOption);
                                         }
                                     }
-                                }
-                            });
-                parent.spawn((
-                    Node {
-                    width: Val::Percent(100.0),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    ..default()
-                    },
-                    BackgroundColor(Color::WHITE),
-                )).with_children(|parent| {
-                    parent
-                        .spawn((
-                            Button,
-                            button_node.clone(),
-                            BackgroundColor(NORMAL_BUTTON),
-                            MenuButtonAction::RestartPlay,
-                        ))
-                        .with_child((Text::new("Play"), button_text_style.clone()));
-                    parent
-                        .spawn((
-                            Button,
-                            button_node.clone(),
-                            BackgroundColor(NORMAL_BUTTON),
-                            MenuButtonAction::BackToMainMenu,
-                        ))
-                        .with_child((Text::new("Back"), button_text_style.clone()));
+                                });
+                            parent
+                                .spawn((
+                                    Node {
+                                        width: Val::Percent(100.0),
+                                        display: Display::Flex,
+                                        flex_direction: FlexDirection::Row,
+                                        ..default()
+                                    },
+                                ))
+                                .with_children(|parent| {
+                                    parent
+                                        .spawn((
+                                            Button,
+                                            button_node.clone(),
+                                            BackgroundColor(NORMAL_BUTTON),
+                                            MenuButtonAction::RestartPlay,
+                                        ))
+                                        .with_child((Text::new("Play"), button_text_style.clone()));
+                                    parent
+                                        .spawn((
+                                            Button,
+                                            button_node.clone(),
+                                            BackgroundColor(NORMAL_BUTTON),
+                                            MenuButtonAction::BackToMainMenu,
+                                        ))
+                                        .with_child((Text::new("Back"), button_text_style.clone()));
+                                });
+                        });
                 });
-            });
         });
-    });
-        println!("test");
+    println!("test");
 }
 
 //saves内の処理

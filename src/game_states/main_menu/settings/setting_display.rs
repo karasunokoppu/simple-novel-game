@@ -1,4 +1,4 @@
-use bevy::{color::palettes::css::CRIMSON, prelude::*};
+use bevy::{color::palettes::css::DARK_VIOLET, prelude::*};
 
 use crate::{
     game_states::main_menu::settings::{MenuButtonAction, SelectedOption},
@@ -38,6 +38,7 @@ pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<
                 ..default()
             },
             OnDisplaySettingsMenuScreen,
+            BackgroundColor(DARK_VIOLET.into()),
         ))
         .with_children(|parent| {
             parent
@@ -47,7 +48,6 @@ pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<
                         align_items: AlignItems::Center,
                         ..default()
                     },
-                    BackgroundColor(CRIMSON.into()),
                 ))
                 .with_children(|parent| {
                     // Create a new `Node`, this time not setting its `flex_direction`. It will
@@ -58,7 +58,7 @@ pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<
                                 align_items: AlignItems::Center,
                                 ..default()
                             },
-                            BackgroundColor(CRIMSON.into()),
+                            BackgroundColor(DARK_VIOLET.into()),
                         ))
                         .with_children(|parent| {
                             // Display a label for the current setting

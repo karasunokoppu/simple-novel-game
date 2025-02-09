@@ -3,7 +3,7 @@ pub mod setting_sound;
 pub mod setting_story;
 
 use crate::TEXT_COLOR;
-use bevy::{color::palettes::css::CRIMSON, prelude::*};
+use bevy::{color::palettes::css::DARK_VIOLET, prelude::*};
 
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 
@@ -58,6 +58,7 @@ pub fn settings_menu_setup(mut commands: Commands) {
                 ..default()
             },
             OnSettingsMenuScreen,
+            BackgroundColor(DARK_VIOLET.into()),
         ))
         .with_children(|parent| {
             parent
@@ -67,7 +68,6 @@ pub fn settings_menu_setup(mut commands: Commands) {
                         align_items: AlignItems::Center,
                         ..default()
                     },
-                    BackgroundColor(CRIMSON.into()),
                 ))
                 .with_children(|parent| {
                     for (action, text) in [

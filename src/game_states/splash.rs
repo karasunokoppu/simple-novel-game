@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use crate::{despawn_screen, GameState};
 
-//TODO 3.[デザインを変更する]
 // This plugin will display a splash screen with Bevy logo for 1 second before switching to the menu
 pub fn splash_plugin(app: &mut App) {
     // As this plugin is managing the splash screen, it will focus on the state `GameState::Splash`
@@ -31,7 +30,7 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         .spawn((
             Node {
                 align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
+                justify_content: JustifyContent::SpaceEvenly,
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
                 ..default()

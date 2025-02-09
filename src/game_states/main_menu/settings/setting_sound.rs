@@ -1,4 +1,4 @@
-use bevy::{color::palettes::css::CRIMSON, prelude::*};
+use bevy::{color::palettes::css::DARK_VIOLET, prelude::*};
 
 use crate::{
     game_states::main_menu::settings::{MenuButtonAction, SelectedOption},
@@ -38,6 +38,7 @@ pub fn sound_settings_menu_setup(mut commands: Commands, volume: Res<Volume>) {
                 ..default()
             },
             OnSoundSettingsMenuScreen,
+            BackgroundColor(DARK_VIOLET.into()),
         ))
         .with_children(|parent| {
             parent
@@ -47,7 +48,6 @@ pub fn sound_settings_menu_setup(mut commands: Commands, volume: Res<Volume>) {
                         align_items: AlignItems::Center,
                         ..default()
                     },
-                    BackgroundColor(CRIMSON.into()),
                 ))
                 .with_children(|parent| {
                     parent
@@ -56,7 +56,7 @@ pub fn sound_settings_menu_setup(mut commands: Commands, volume: Res<Volume>) {
                                 align_items: AlignItems::Center,
                                 ..default()
                             },
-                            BackgroundColor(CRIMSON.into()),
+                            BackgroundColor(DARK_VIOLET.into()),
                         ))
                         .with_children(|parent| {
                             parent.spawn((Text::new("Volume"), button_text_style.clone()));

@@ -3,10 +3,13 @@ use std::fs::File;
 
 use crate::{
     despawn_screen,
-    game_states::{in_game::{
-        DisplayImage, ImageData, InGameState, NovelGameStates, StoryDataList, StoryImageList,
-        StorySceneData, WallPaperData, WallpaperAssets, Wallpapers,
-    }, main_menu::MenuState},
+    game_states::{
+        in_game::{
+            DisplayImage, ImageData, InGameState, NovelGameStates, StoryDataList, StoryImageList,
+            StorySceneData, WallPaperData, WallpaperAssets, Wallpapers,
+        },
+        main_menu::MenuState,
+    },
     GameState,
 };
 
