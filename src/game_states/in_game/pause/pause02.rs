@@ -215,7 +215,10 @@ pub fn in_pause_in_load_button_system(
     {
         match *interaction {
             Interaction::Pressed => match *menu_button_action {
-                MenuButtonAction::BackToMainMenu => menu_state.set(MenuState::Disabled),
+                MenuButtonAction::BackToMainMenu => {
+                    in_game_state.set(InGameState::LoadingGame);
+                    menu_state.set(MenuState::Disabled)
+                },
                 MenuButtonAction::RestartPlay => {
                     pause_button_state.set(PauseButtonState::NotPressed);
                     next_draw_ui_state.set(DrawUIState::Disabled);

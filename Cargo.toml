@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+accesskit = "0.17.1"
 bevy = "0.15.1"
 ron = "0.8.1"
 serde = "1.0.217"

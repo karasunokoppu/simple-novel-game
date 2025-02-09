@@ -9,7 +9,7 @@ use crate::{
         setting_display::{display_settings_menu_setup, OnDisplaySettingsMenuScreen},
         setting_sound::{sound_settings_menu_setup, OnSoundSettingsMenuScreen},
         setting_story::{
-            get_save_files_names, story_settings_menu_setup, OnStorySettingsMenuScreen, SaveDatas,
+            get_save_files_names, story_settings_menu_setup, OnStorySettingsMenuScreen, update_scroll_position,
         },
         settings_menu_setup, MenuButtonAction, OnSettingsMenuScreen, SelectedOption,
     },
@@ -44,7 +44,7 @@ pub fn menu_plugin(app: &mut App) {
         )
         .add_systems(
             Update,
-            (setting_button::<SelectedStory>.run_if(in_state(MenuState::SettingsStory)),),
+            ((update_scroll_position, setting_button::<SelectedStory>).run_if(in_state(MenuState::SettingsStory)),),
         )
         .add_systems(
             OnExit(MenuState::SettingsStory),

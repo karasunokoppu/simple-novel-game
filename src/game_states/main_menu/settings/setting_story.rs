@@ -1,6 +1,8 @@
 use bevy::{
-    color::palettes::css::CRIMSON, prelude::*, render::render_resource::encase::private::Length,
+    a11y::AccessibilityNode, input::mouse::{MouseScrollUnit, MouseWheel}, picking::focus::HoverMap,
+    color::palettes::css::CRIMSON, prelude::*, render::render_resource::encase::private::Length
 };
+use accesskit::{Node as Accessible, Role};
 use std::fs;
 
 use crate::{
@@ -52,88 +54,100 @@ pub fn story_settings_menu_setup(
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
+                justify_content: JustifyContent::FlexStart,
                 ..default()
             },
+            BackgroundColor(CRIMSON.into()),
         ))
         .with_children(|parent| {
             parent
                 .spawn((
                     Node {
-                        width: Val::Percent(100.0),
+                        width: Val::Percent(20.0),
                         height: Val::Percent(100.0),
-                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
+                        display: Display::Grid,
+                        grid_template_rows: vec![
+                            GridTrack::flex(1.0),
+                            GridTrack::auto()
+                        ],
                         ..default()
                     },
-                    BackgroundColor(CRIMSON.into()),
-                ))
-                .with_children(|parent| {
-                    parent
-                        .spawn((
-                            Node {
-                                width: Val::Percent(100.0),
-                                height: Val::Percent(100.0),
-                                display: Display::Flex,
-                                flex_wrap: FlexWrap::Wrap,
-                                align_items: AlignItems::Center,
-                                ..default()
-                            },
-                            BackgroundColor(CRIMSON.into()),
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn((Text::new("Volume"), button_text_style.clone()));
-
-                            if save_data.0.length() > 0 {
-                                for save_data_iter in 1..(*save_data.0.last().unwrap() + 1) {
-                                    //TODO 2.[スクロールに変更する]
-                                    let mut entity = parent.spawn((
-                                        Button,
-                                        Node {
-                                            width: Val::Px(30.0),
-                                            height: Val::Px(65.0),
-                                            ..button_node.clone()
-                                        },
-                                        BackgroundColor(NORMAL_BUTTON),
-                                        SelectedStory(save_data_iter),
-                                        MenuButtonAction::LoadData(save_data_iter),
-                                    ));
-                                    entity.insert((
-                                        Text::new(format!("{}", save_data_iter)),
-                                        button_text_style.clone(),
-                                    ));
-                                    if *save_story == SelectedStory(save_data_iter) {
-                                        entity.insert(SelectedOption);
+                )).with_children(|parent| {
+                    parent.spawn((
+                                Node {
+                                    width: Val::Percent(100.0),
+                                    height: Val::Percent(100.0),
+                                    display: Display::Flex,
+                                    flex_direction: FlexDirection::Column,
+                                    overflow: Overflow::scroll_y(),
+                                    align_items: AlignItems::Center,
+                                    ..default()
+                                },
+                                BackgroundColor(Color::srgb(0.7, 0.7, 0.7)),
+                            ))
+                            .with_children(|parent| {
+                                if save_data.0.length() > 0 {
+                                    for save_data_iter in 1..(*save_data.0.last().unwrap() + 1) {
+                                        //TODO 2.[スクロールに変更する]
+                                        let mut entity = parent.spawn((
+                                            Button,
+                                            Node {
+                                                width: Val::Percent(100.0),
+                                                height: Val::Px(100.0),
+                                                justify_content: JustifyContent::Center,
+                                                align_items: AlignItems::Center,
+                                                ..default()
+                                            },
+                                            BackgroundColor(NORMAL_BUTTON),
+                                            SelectedStory(save_data_iter),
+                                            MenuButtonAction::LoadData(save_data_iter),
+                                            AccessibilityNode(Accessible::new(
+                                                Role::ListItem
+                                            )),Label,
+                                            PickingBehavior {
+                                                should_block_lower: false,
+                                                ..default()
+                                            }
+                                        ));
+                                        entity.insert((
+                                            Text::new(format!("{}", save_data_iter)),
+                                            button_text_style.clone(),
+                                        ));
+                                        if *save_story == SelectedStory(save_data_iter) {
+                                            entity.insert(SelectedOption);
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                parent.spawn((
+                    Node {
+                    width: Val::Percent(100.0),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    ..default()
+                    },
+                    BackgroundColor(Color::WHITE),
+                )).with_children(|parent| {
                     parent
-                        .spawn(Node {
-                            display: Display::Flex,
-                            flex_direction: FlexDirection::Row,
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            parent
-                                .spawn((
-                                    Button,
-                                    button_node.clone(),
-                                    BackgroundColor(NORMAL_BUTTON),
-                                    MenuButtonAction::RestartPlay,
-                                ))
-                                .with_child((Text::new("Play"), button_text_style.clone()));
-                            parent
-                                .spawn((
-                                    Button,
-                                    button_node.clone(),
-                                    BackgroundColor(NORMAL_BUTTON),
-                                    MenuButtonAction::BackToMainMenu,
-                                ))
-                                .with_child((Text::new("Back"), button_text_style.clone()));
-                        });
+                        .spawn((
+                            Button,
+                            button_node.clone(),
+                            BackgroundColor(NORMAL_BUTTON),
+                            MenuButtonAction::RestartPlay,
+                        ))
+                        .with_child((Text::new("Play"), button_text_style.clone()));
+                    parent
+                        .spawn((
+                            Button,
+                            button_node.clone(),
+                            BackgroundColor(NORMAL_BUTTON),
+                            MenuButtonAction::BackToMainMenu,
+                        ))
+                        .with_child((Text::new("Back"), button_text_style.clone()));
                 });
+            });
         });
     });
         println!("test");
@@ -161,4 +175,37 @@ pub fn get_save_files_names(mut save_datas: ResMut<SaveDatas>) {
     file_names.sort_by_key(|s| *s);
 
     save_datas.0 = file_names;
+}
+
+const LINE_HEIGHT: f32 = 21.;
+pub fn update_scroll_position(
+    mut mouse_wheel_events: EventReader<MouseWheel>,
+    hover_map: Res<HoverMap>,
+    mut scrolled_node_query: Query<&mut ScrollPosition>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    for mouse_wheel_event in mouse_wheel_events.read() {
+        let (mut dx, mut dy) = match mouse_wheel_event.unit {
+            MouseScrollUnit::Line => (
+                mouse_wheel_event.x * LINE_HEIGHT,
+                mouse_wheel_event.y * LINE_HEIGHT,
+            ),
+            MouseScrollUnit::Pixel => (mouse_wheel_event.x, mouse_wheel_event.y),
+        };
+
+        if keyboard_input.pressed(KeyCode::ControlLeft)
+            || keyboard_input.pressed(KeyCode::ControlRight)
+        {
+            std::mem::swap(&mut dx, &mut dy);
+        }
+
+        for (_pointer, pointer_map) in hover_map.iter() {
+            for (entity, _hit) in pointer_map.iter() {
+                if let Ok(mut scroll_position) = scrolled_node_query.get_mut(*entity) {
+                    scroll_position.offset_x -= dx;
+                    scroll_position.offset_y -= dy;
+                }
+            }
+        }
+    }
 }

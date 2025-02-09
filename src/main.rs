@@ -105,4 +105,4 @@ fn state_change_detect<T: States + Copy>(
         println!("{} {} {} {}", ">", t_type, "changed to", current_state,);
     }
 }
-//TODO 2.[各ボタンを押したときに、ターミナルにログが出るようにする]
+//TODO 3.[各ボタンを押したときに、ターミナルにログが出るようにする]
